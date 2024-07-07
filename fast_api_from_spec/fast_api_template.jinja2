@@ -1,0 +1,61 @@
+from fastapi import FastAPI
+from pydantic import BaseModel
+from typing import Optional, List, Any
+import requests
+
+app = FastAPI()
+
+# Define Pydantic models for the components
+{% for model_name, model_spec in components.items() %}
+{%- if 'properties' in model_spec.keys()%}
+
+class {{ model_name }}(BaseModel):
+{%- for prop_name, prop_spec in model_spec.properties.items() %}
+    {%- if prop_spec.type == 'array' %}
+        {{ prop_name }}: List[{{ prop_spec.items['$ref'].split('/')[-1] }}]
+    {%- elif prop_spec.type == 'object' and '$ref' in prop_spec %}
+        {{ prop_name }}: {{ prop_spec['$ref'].split('/')[-1] }}
+    {%- else %}
+        {{ prop_name }}: {% if prop_spec.type == 'string' %}str{% elif prop_spec.type == 'integer' %}int{% elif prop_spec.type == 'boolean' %}bool{% elif prop_spec.type == 'number' %}float{% else %}Any{% endif %}{% if prop_spec.nullable %} = None{% endif %}
+    {%- endif %}
+{%- endfor %}
+
+{%-else%}
+class {{ model_name }}(BaseModel):
+{%- if model_spec.type == 'array' %}
+        items: List[{{ model_spec['items']['$ref'].split('/')[-1] }}]
+{%-endif%}
+{%-endif%}
+{% endfor %}
+
+# Define FastAPI endpoints
+{% for endpoint in endpoints %}
+@app.{{ endpoint.method }}("{{ endpoint.path }}", response_model={{ endpoint.response_model.name }})
+async def {{ endpoint.name }}({% for param in endpoint.parameters %}{{ param.name }}: {% if param.type == 'string' %}str{% elif param.type == 'integer' %}int{% elif param.type == 'boolean' %}bool{% elif param.type == 'number' %}float{% else %}Any{% endif %}{% if param.nullable %} = None{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}):
+    """
+    {{ endpoint.description }}
+    """
+    path_params = {
+        {% for param in endpoint.parameters if param.in == 'path' %}
+        "{{ param.name }}": {{ param.name }}{% if not loop.last %},{% endif %}
+        {% endfor %}
+    }
+    query_params = {
+        {% for param in endpoint.parameters if param.in == 'query' %}
+        "{{ param.name }}": {{ param.name }}{% if not loop.last %},{% endif %}
+        {% endfor %}
+    }
+    response = requests.{{ endpoint.method }}("http://mobility.teadal.ubiwhere.com/fdp-amts-gtfs-static{{ endpoint.path }}".format(**path_params), params=query_params)
+    response_data = response.json()
+    return {{ endpoint.response_model.name }}(
+        {%- if 'properties' not in endpoint.response_model %}
+        # assume it's array
+        items: List[{{ model_spec['items']['$ref'].split('/')[-1] }}]
+        {%else%}
+        {%- for prop_name, prop_spec in endpoint.response_model.properties.items() %}
+        {{ prop_name }}=response_data["{{ prop_name }}"]{% if not loop.last %},{% endif %}
+        {%- endfor %}
+        {%-endif%})
+    
+
+{% endfor %}
