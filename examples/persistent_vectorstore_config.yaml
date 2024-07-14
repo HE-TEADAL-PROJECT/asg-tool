@@ -1,0 +1,35 @@
+ai_platforms:
+  BAM:
+    platform: bam
+    api_key: $BAM_KEY
+    api_base: https://bam-api.res.ibm.com/
+models:
+  encoder-slate:
+    id: ibm/slate.30m.english.rtrvr
+    host: BAM
+    parameters:
+      truncate_input_tokens: true
+  granite-api:
+    id: ibm/granite-20b-code-instruct-unified-api
+    host: BAM
+    parameters:
+      decoding_method: greedy
+      max_new_tokens: 4096
+      random_seed: 10
+      temperature: 0
+retrieval:
+  persistent_vector_store_dir: ./var/vs
+  models:
+    - encoder-slate
+  top_k: 8
+  rerank:
+    model: bge-large-en-v1
+    # (optional) Maximum number of results to return
+    top_n : 5
+
+generation:
+  models:
+    - granite-api
+  retries: 5
+api_key: $INSTANA_KEY
+auth: apiToken
