@@ -1,0 +1,27 @@
+from fastapi import FastAPI
+import requests
+from fastapi.responses import JSONResponse
+
+app = FastAPI()
+
+# Define FastAPI endpoints
+{% for endpoint in endpoints %}
+@app.{{ endpoint.method }}("{{ endpoint.path }}")
+async def {{ endpoint.name }}({% for param in endpoint.parameters %}{{ param.name }}: {% if param.type == 'string' %}str{% elif param.type == 'integer' %}int{% elif param.type == 'boolean' %}bool{% elif param.type == 'number' %}float{% else %}Any{% endif %}{% if param.nullable %} = None{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}):
+    """
+    {{ endpoint.description }}
+    """
+    path_params = {
+        {%- for param in endpoint.parameters if param.in == 'path' %}
+        "{{ param.name }}": {{ param.name }}{%- if not loop.last %},{%- endif %}
+        {%- endfor %}
+    }
+    query_params = {
+        {%- for param in endpoint.parameters if param.in == 'query' %}
+        "{{ param.name }}": {{ param.name }}{%- if not loop.last %},{%- endif %}
+        {%- endfor %}
+    }
+    response = requests.{{ endpoint.method }}("http://mobility.teadal.ubiwhere.com/fdp-amts-gtfs-static{{ endpoint.path }}".format(**path_params), params=query_params)
+    response_data = response.json()
+    return JSONResponse(response_data)
+{% endfor %}

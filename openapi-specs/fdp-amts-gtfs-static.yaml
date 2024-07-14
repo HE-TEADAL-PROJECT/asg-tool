@@ -1,0 +1,84 @@
+openapi: 3.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  # Added by API Auto Mocking Plugin
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: http://localhost:8080
+info:
+  description: This API is an example of what a FDP could look like.
+  version: "1.0.0"
+  title: FPD sync API Complete data
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+paths:
+  /stops:
+    get:
+      summary: return list of all stops
+      operationId: getStops
+      description: |
+        Returns all the stops that are present in the FDP.
+      responses:
+       '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stops'
+  /stops/stop_id/{stop_id}:
+    get:
+      summary: Retiurn data of a stop
+      operationId: getStopById
+      description: Returns the data of a stop given its unique identifier.
+      parameters:
+        - in: path
+          name: stop_id
+          required: true
+          schema:
+            type : string
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stop'
+        '404':
+          description: Bad input parameter
+  
+components:
+  schemas:
+    Stop:
+      type: object
+      properties:
+        stop_id:
+          type: integer
+          example: 101
+        stop_name:
+          type: string
+          example: Martiri LibertĂ  SaittaMarshall
+        stop_lat:
+          type: number
+          example: 37.50755595
+        stop_lon:
+          type: number
+          example: 15.09658165
+        location_type: 
+          type: integer
+          example: 0
+        parent_station:
+          type: string
+          example: ""
+        wheelchair_boarding:
+          type: string
+          example: ""
+      required:
+        - stop_id
+        - stop_name
+        - stop_lat
+        - stop_lon
+    Stops: 
+        type: array        
+        items: 
+          $ref: '#/components/schemas/Stop'
