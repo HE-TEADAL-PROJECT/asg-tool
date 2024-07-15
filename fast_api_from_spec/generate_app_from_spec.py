@@ -7,14 +7,14 @@ def render_fastapi_template(output_file, endpoints, components, name_suffix):
     env = Environment(loader=FileSystemLoader('.'), extensions=['jinja2.ext.loopcontrols'])
     template = env.get_template('fast_api_from_spec/fast_api_template.jinja2')
     if 'static' in name_suffix:
-        tedal_server = 'http://mobility.teadal.ubiwhere.com/'+ name_suffix
+        teadal_server = 'http://mobility.teadal.ubiwhere.com/'+ name_suffix
     else:
-        tedal_server = 'http://industry.teadal.ubiwhere.com/' + name_suffix
+        teadal_server = 'http://industry.teadal.ubiwhere.com/' + name_suffix
     
     data = {
         "endpoints": endpoints,
         "components" : components,
-        "tedal_server" : tedal_server
+        "teadal_server" : teadal_server
     }
     
     rendered_content = template.render(data)
