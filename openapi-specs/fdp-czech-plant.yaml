@@ -1,0 +1,82 @@
+openapi: 3.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  # Added by API Auto Mocking Plugin
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: http://localhost:8080
+info:
+  description: This API is about the FDP of the data prpduced by the Cz plant.
+  version: "1.0.0"
+  title: FPD sync API Complete data
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+paths:
+  /shipments:
+    get:
+      summary: return list of all shipments
+      operationId: getShipments
+      description: |
+        Returns all the shipments that are present in the sFDP.
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Shipments'
+  /shipments/customer/{id}:
+    get:
+      summary: Retiurn shipments about a customer
+      operationId: getShipmentsByCustomer
+      description: Returns the data of a patient given its unique identifier.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type : string
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Shipments'
+        '404':
+          description: Bad input parameter
+  
+components:
+  schemas:
+    Shipment:
+      type: object
+      properties:
+        year:
+          type: integer
+          example: 2024
+        month:
+          type: integer
+          example: 12
+        week:
+          type: integer
+          example: 3
+        customer_id:
+          type: number
+          example: 1111
+        customer_name: 
+          type: string
+          example: John Doe
+        item_id:
+          type: string
+          example: 30331568937
+        item_desc:
+          type: string
+          example: piece of pieces        
+      required:
+        - customer_id
+        - item_id
+    Shipments: 
+        type: array        
+        items: 
+          $ref: '#/components/schemas/Shipment'
