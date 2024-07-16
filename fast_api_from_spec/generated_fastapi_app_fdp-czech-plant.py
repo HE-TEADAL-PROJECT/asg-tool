@@ -23,7 +23,7 @@ async def getShipments():
 @app.get("/shipments/customer/{id}")
 async def getShipmentsByCustomer(id: str):
     """
-    Returns the data of a patient given its unique identifier.
+    Return shipment by customer id.
     """
     path_params = {
         "id": id

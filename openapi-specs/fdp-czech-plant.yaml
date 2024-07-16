@@ -28,9 +28,9 @@ paths:
                 $ref: '#/components/schemas/Shipments'
   /shipments/customer/{id}:
     get:
-      summary: Retiurn shipments about a customer
+      summary: Return shipments about a customer
       operationId: getShipmentsByCustomer
-      description: Returns the data of a patient given its unique identifier.
+      description: Return shipment by customer id.
       parameters:
         - in: path
           name: id
