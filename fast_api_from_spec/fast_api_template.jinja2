@@ -21,7 +21,7 @@ async def {{ endpoint.name }}({% for param in endpoint.parameters %}{{ param.nam
         "{{ param.name }}": {{ param.name }}{%- if not loop.last %},{%- endif %}
         {%- endfor %}
     }
-    response = requests.{{ endpoint.method }}("http://mobility.teadal.ubiwhere.com/fdp-amts-gtfs-static{{ endpoint.path }}".format(**path_params), params=query_params)
+    response = requests.{{ endpoint.method }}("{{teadal_server}}{{ endpoint.path }}".format(**path_params), params=query_params)
     response_data = response.json()
     return JSONResponse(response_data)
 {% endfor %}

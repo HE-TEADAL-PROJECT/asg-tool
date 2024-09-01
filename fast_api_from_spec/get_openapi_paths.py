@@ -48,5 +48,4 @@ def parse_endpoints(openapi_spec):
                         "properties": response_model_spec
                     }
                 })
-    print(endpoints)            
     return endpoints
