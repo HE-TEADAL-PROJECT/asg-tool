@@ -1,6 +1,8 @@
 from fastapi import FastAPI
 import requests
 from fastapi.responses import JSONResponse
+import pandas as pd
+from transform import transform_functions
 
 app = FastAPI()
 
@@ -23,5 +25,18 @@ async def {{ endpoint.name }}({% for param in endpoint.parameters %}{{ param.nam
     }
     response = requests.{{ endpoint.method }}("{{teadal_server}}{{ endpoint.path }}".format(**path_params), params=query_params)
     response_data = response.json()
-    return JSONResponse(response_data)
+    # Perform your transformation here
+    # Transform to DF.
+    # Create DataFrame from the response data
+    df = pd.DataFrame(response_data)
+    
+    # Apply transformation functions
+    {% for func in functions %}
+    df = transform_functions.{{ func.name }}(df=df, {% for param_name, param_value in func.parameters.items() if param_name != 'df' %}
+        {{ param_name }}='{{ param_value }}'{% if not loop.last %}, {% endif %}
+        {% endfor %})
+    {% endfor %}
+    
+    # Return the transformed result
+    return JSONResponse(df.to_dict(orient="records"))
 {% endfor %}

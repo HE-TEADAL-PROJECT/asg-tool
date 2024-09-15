@@ -9,16 +9,8 @@ models:
     host: BAM
     parameters:
       truncate_input_tokens: true
-  granite-api20:
+  granite-api:
     id: ibm/granite-20b-code-instruct-unified-api
-    host: BAM
-    parameters:
-      decoding_method: greedy
-      max_new_tokens: 1024
-      random_seed: 10
-      temperature: 0
-  granite-api8:
-    id: ibm/granite-8b-unified-api-model-v2
     host: BAM
     parameters:
       decoding_method: greedy
@@ -33,20 +25,34 @@ models:
         return_options:
           documents: true
           query: true
+  granite-multilang :      
+    id: ibm/granite-20b-multilang-lab-rc
+    host: BAM
+    parameters:
+      decoding_method: greedy
+      max_new_tokens: 4096
+      random_seed: 10
+      temperature: 0
+  llama3 :      
+    id: peri/llama-3-70b-instruct
+    host: BAM
+    parameters:
+      decoding_method: greedy
+      max_new_tokens: 2048
+      temperature: 0
 retrieval:
-  persistentVectorStoreDir: ./var/vs
+  # (required) Models to use for retrieval, ordered by preference
   models:
     - encoder-slate
   topK: 10
   rerank:
-    model: bge-large-en-v1
-    # (optional) Maximum number of results to return
-    topN : 4
-
+      # (optional) Maximum number of results to return
+      topN: 4
+      model: bge-large-en-v1
 generation:
   models:
-    - granite-api20
-  maxIter: 5
+    - granite-api
+  maxIter: 3
 evaluation:
   models:
    - llama3
