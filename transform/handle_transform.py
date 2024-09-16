@@ -1,9 +1,18 @@
-from unittest import result
+import json
 from acg.agents.tool_calling import apply_tool_calling 
 from acg import config
+from acg.retrieval import get_doc_for_call
+
 from acg.agents.build_connector import (
     _get_inference_model,
     _get_missing_value_int,
+)
+
+from acg.con_spec import (
+    ArgLocationEnum,
+    ArgSourceEnum,
+    CallTypeEnum,
+    make_out_dataframes,
 )
 from acg.agents.context_retrievers import retrieve_tools_from_list
 from acg.executor.transform.decorator import tool_metadata_list
@@ -33,33 +42,114 @@ def _tool_call(
     final_state = apply_tool_calling(state)
     return final_state
 
-def parse_transform_result(result):
-    return result['api_calls']
-    #print(result[''])
+def add_export_section(endpoint_name, con_spec, results):
+    # assuming only one
+    endpoint_transform = next((res for res in results if res['endpoint'] == endpoint_name), None)
+    if endpoint_transform is None:
+        return json.dumps(con_spec)
+    for call in endpoint_transform['api_calls']:
+        context_doc = get_doc_for_call(call.name, endpoint_transform['context'])
+        doc = context_doc.metadata
+        args = {}
+        list_args = []
+        ref_params = json.loads(doc["parameters"])
+        for param, props in ref_params.items():
+            if param == 'df':
+                continue
+            if param in call.parameters or (
+                "required" in props and props["required"]
+            ):
+                args = {}
+                args["name"] = param
+                if param in call.parameters:
+                    args["value"] = call.parameters[param]
+                args["type"] = ref_params[param]["type"]
+                list_args.append(args)
+    dataframe = list(con_spec['spec']['output']['data'].keys())[0]
+    #dataframe = make_out_dataframes(endpoint_transform_inf['api_calls'][-1],endpoint_transform_inf["context"])
+    exports = {
+    'exports': {
+        'MyoutputDF': {
+            'dataframe': dataframe,
+            'fields': {
+                'target': [
+                    {
+                        'function': doc['operation_id'],
+                        'description': doc['description'],
+                        'params': {}
+                    }
+                    ]
+                    }
+                }
+            }
+        }
+    for param in list_args:
+        exports['exports']['MyoutputDF']['fields']['target'][0]['params'][param['name']] = param['value']
+    con_spec['spec']['output']['exports'] = exports['exports']
+    return json.dumps(con_spec)
+
+
+def create_spec_section(endpoint, base_url, apiKey, auth, path_params, query_params ):
+    apicall = {
+        "type": CallTypeEnum.URL,
+    }
+    list_args = []
+    apicalls_dict = {}
+
+    args = {}
+    apicall["endpoint"] = endpoint["path"]
+    apicall["method"] = endpoint["method"]
+    # Find the matching tool by name
+    for param in endpoint['parameters']:
+        if param["name"] in path_params.keys():
+            args["name"] = param["name"]
+            args["source"] = ArgSourceEnum.CONSTANT
+            args["value"] = path_params[param["name"]]
+            args["type"] = param["type"]
+            args["argLocation"] = ArgLocationEnum.PARAMETER
+        #query params
+        list_args.append(args)
+    apicall["arguments"] = list_args
+
+    apicalls_dict[endpoint["name"]] = apicall
+
+    con_spec = {
+        "apiVersion": "connector/v1",
+        "kind": "connector/v1",
+        "metadata": {
+            "name": "TBD",
+            "description": "TBD",
+            "inputPrompt": "BLABLABALBA",
+        },
+        "spec": {
+            "apiCalls": apicalls_dict,
+            "output": {
+                "execution": "",
+                "runtimeType": "python",
+                "data": {endpoint["response_model"]["name"] : {"api":endpoint["name"], "metadata":None, "path":"."}},#should be for all
+                "exports": None,
+            },
+        },
+        "servers": [{"url": base_url}],
+        "apiKey": apiKey,
+        "auth": auth,
+    }
+    #print(con_spec)
+    #return json.dumps(con_spec)
+    return con_spec
+
 
 def handle_transform_instructions(list_of_instructions):
     conf = './examples/ephemeral_vectorstore_config.yaml'
     results = [] 
     for instruction in list_of_instructions:
+        res = {}
         endpoint, instruct = instruction.split(':')
         result =_tool_call(conf, instruct)
-        func_call ={}
-        for call in result['api_calls']:
-            func_call['endpoint'] = endpoint
-            func_call['parameters'] = call.parameters
-            func_call['name'] = (call.name).split('.')[1]
-            results.append(func_call)
-        # Add quotation marks for str typed params.
-        for call in results:
-        # Find the matching tool by name
-            matching_tool = next((tool for tool in tool_metadata_list if tool.name == call['name']), None)
-            if matching_tool:
-                for param_name, param_value in call['parameters'].items():
-                    matching_param = next((_param for _param in matching_tool.params if _param['name'] == param_name), None)
-                    # Check if the parameter type is 'str' and update the call's parameter
-                    if matching_param and matching_param['type'] == 'str':
-                        call['parameters'][param_name] = f"'{param_value}'"
-
+        res['endpoint'] = endpoint
+        res['context'] = result['context']
+        res['api_calls'] = result['api_calls']
+        results.append(res)        
     return results
 
 if __name__ == "__main__":
