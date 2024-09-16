@@ -39,8 +39,28 @@ def parse_transform_result(result):
 
 def handle_transform_instructions(list_of_instructions):
     conf = './examples/ephemeral_vectorstore_config.yaml'
-    result =_tool_call(conf, list_of_instructions[0])
-    return parse_transform_result(result)
+    results = [] 
+    for instruction in list_of_instructions:
+        endpoint, instruct = instruction.split(':')
+        result =_tool_call(conf, instruct)
+        func_call ={}
+        for call in result['api_calls']:
+            func_call['endpoint'] = endpoint
+            func_call['parameters'] = call.parameters
+            func_call['name'] = (call.name).split('.')[1]
+            results.append(func_call)
+        # Add quotation marks for str typed params.
+        for call in results:
+        # Find the matching tool by name
+            matching_tool = next((tool for tool in tool_metadata_list if tool.name == call['name']), None)
+            if matching_tool:
+                for param_name, param_value in call['parameters'].items():
+                    matching_param = next((_param for _param in matching_tool.params if _param['name'] == param_name), None)
+                    # Check if the parameter type is 'str' and update the call's parameter
+                    if matching_param and matching_param['type'] == 'str':
+                        call['parameters'][param_name] = f"'{param_value}'"
+
+    return results
 
 if __name__ == "__main__":
     list_of_instructions = ['Rename column id to identifier']

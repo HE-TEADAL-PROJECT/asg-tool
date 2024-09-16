@@ -24,19 +24,7 @@ async def getShipments():
     # Transform to DF.
     # Create DataFrame from the response data
     return JSONResponse(response_data)
-    df = pd.DataFrame(response_data)
     
-    # Apply transformation functions
-    
-    df = transform_functions.map_field(df=df, 
-        source='id', 
-        
-        target='identifier'
-        )
-    
-    
-    # Return the transformed result
-    return JSONResponse(df.to_dict(orient="records"))
 
 @app.get("/shipments/customer/{id}")
 async def getShipmentsByCustomer(id: str):
@@ -53,16 +41,5 @@ async def getShipmentsByCustomer(id: str):
     # Perform your transformation here
     # Transform to DF.
     # Create DataFrame from the response data
-    df = pd.DataFrame(response_data)
+    return JSONResponse(response_data)
     
-    # Apply transformation functions
-    
-    df = transform_functions.map_field(df=df, 
-        source='id', 
-        
-        target='identifier'
-        )
-    
-    
-    # Return the transformed result
-    return JSONResponse(df.to_dict(orient="records"))

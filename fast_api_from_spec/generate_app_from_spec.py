@@ -29,10 +29,10 @@ def generate_app_for_spec(spec_file_name):
     openapi_spec = load_openapi_spec(spec_file_name)
     endpoints = parse_endpoints(openapi_spec)
     components = openapi_spec.get("components", {}).get("schemas", {})
-    list_of_instructions = ['Rename column id to identifier']
+    list_of_instructions = ['getStops: Rename column id to identifier']
     functions = handle_transform_instructions(list_of_instructions)
-    for func in functions:
-        func.name = (func.name).split('.')[1]
+    # for func in functions:
+    #     func.name = (func.name).split('.')[1]
     # Get the name of the endpoint from spec file name
     name_suffix = spec_file_name.split('yaml')[0].split('/')[2].split('.')[0]
     render_fastapi_template(f"fast_api_from_spec/generated_fastapi_app_{name_suffix}.py", endpoints, components, name_suffix, functions)

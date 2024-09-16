@@ -23,19 +23,15 @@ async def getStops():
     # Perform your transformation here
     # Transform to DF.
     # Create DataFrame from the response data
+    # Convert the response to a DataFrame (df) if the function requires it
     df = pd.DataFrame(response_data)
-    
-    # Apply transformation functions
-    
-    df = transform_functions.map_field(df=df, 
+    # Apply transformation function to the specific endpoint
+    result = transform_functions.map_field(df=df,
         source='id', 
-        
         target='identifier'
-        )
+    )
+    return JSONResponse(result)
     
-    
-    # Return the transformed result
-    return JSONResponse(df.to_dict(orient="records"))
 
 @app.get("/stops/stop_id/{stop_id}")
 async def getStopById(stop_id: str):
@@ -52,16 +48,5 @@ async def getStopById(stop_id: str):
     # Perform your transformation here
     # Transform to DF.
     # Create DataFrame from the response data
-    df = pd.DataFrame(response_data)
+    return JSONResponse(response_data)
     
-    # Apply transformation functions
-    
-    df = transform_functions.map_field(df=df, 
-        source='id', 
-        
-        target='identifier'
-        )
-    
-    
-    # Return the transformed result
-    return JSONResponse(df.to_dict(orient="records"))

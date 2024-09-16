@@ -28,15 +28,22 @@ async def {{ endpoint.name }}({% for param in endpoint.parameters %}{{ param.nam
     # Perform your transformation here
     # Transform to DF.
     # Create DataFrame from the response data
+    {%- set flag = {'value': True} %}
+    {%- for  func in functions | selectattr('endpoint', 'equalto', endpoint.name) %}
+    # Convert the response to a DataFrame (df) if the function requires it
     df = pd.DataFrame(response_data)
+    {%- if flag.update({'value': False}) %}
+    {%- endif %}
+    # Apply transformation function to the specific endpoint
+    result = transform_functions.{{ func.name }}(df=df,
+        {%- for param_name, param_value in func.parameters.items() if param_name != 'df' %}
+        {{ param_name }}={{ param_value }}{% if not loop.last %}, {% endif %}
+        {%- endfor %}
+    )
+    return JSONResponse(result)
+    {%- endfor %}
+    {%- if flag['value'] %}
+    return JSONResponse(response_data)
+    {%- endif %}
     
-    # Apply transformation functions
-    {% for func in functions %}
-    df = transform_functions.{{ func.name }}(df=df, {% for param_name, param_value in func.parameters.items() if param_name != 'df' %}
-        {{ param_name }}='{{ param_value }}'{% if not loop.last %}, {% endif %}
-        {% endfor %})
-    {% endfor %}
-    
-    # Return the transformed result
-    return JSONResponse(df.to_dict(orient="records"))
 {% endfor %}
