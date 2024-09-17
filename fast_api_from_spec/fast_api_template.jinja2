@@ -30,6 +30,10 @@ async def {{ endpoint.name }}({% for param in endpoint.parameters %}{{ param.nam
     con_spec = handle_transform.create_spec_section({{endpoint}}, '{{teadal_server}}', "1234", "apiToken", path_params, query_params)
     full_spec = handle_transform.add_export_section('{{endpoint.name}}', con_spec, {{results}})
     res = exec.run_from_spec_string(full_spec)
-    response_data = {key: df.to_dict(orient='records') for key, df in res.items()}
+    try:
+        response_data = {key: df.to_dict(orient='records') for key, df in res.items()}
+    except:
+        # In case no transformations, return json.
+        return JSONResponse(res['.'])
     return JSONResponse(response_data)
 {% endfor %}

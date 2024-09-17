@@ -12,6 +12,10 @@ instructions:
                     type: number
                     example: 37.50755595
                     description: "Concatenated stop_lat with stop_lon for this stop"
+                stop_name:
+                    type: string
+                    example: Martiri LibertĂ SaittaMarshall
+                    description: "Concatenated stop_name with parent_station for this stop"    
               required:
               - stop_id
               - stop_name
