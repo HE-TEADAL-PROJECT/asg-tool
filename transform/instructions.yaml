@@ -4,10 +4,10 @@ instructions:
           Stop:
               type: object
               properties:
-                stop_id:
+                stop_ID:
                     type: integer
                     example: 101
-                    description: "The stop_id for this stop"
+                    description: "map stop_id to new column stop_ID"
                 stop_lat_lon:
                     type: number
                     example: 37.50755595

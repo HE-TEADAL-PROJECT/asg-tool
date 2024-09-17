@@ -74,10 +74,11 @@ def add_export_section(endpoint_name, con_spec, results):
     # dataframe = list(con_spec['spec']['output']['data'].keys())[0]['path']
     dataframe='.'
     target_field = endpoint_transform['target_name']
+    MyoutputDF = endpoint_transform['output_df_name'] 
     #dataframe = make_out_dataframes(endpoint_transform_inf['api_calls'][-1],endpoint_transform_inf["context"])
     exports = {
     'exports': {
-        'MyoutputDF': {
+        MyoutputDF: {
             'dataframe': dataframe,
             'fields': {
                 target_field: [
@@ -92,7 +93,7 @@ def add_export_section(endpoint_name, con_spec, results):
             }
         }
     for param in list_args:
-        exports['exports']['MyoutputDF']['fields'][target_field][0]['params'][param['name']] = param['value']
+        exports['exports'][MyoutputDF]['fields'][target_field][0]['params'][param['name']] = param['value']
     con_spec['spec']['output']['exports'] = exports['exports']
     return json.dumps(con_spec)
 
@@ -151,18 +152,17 @@ def handle_transform_instructions(list_of_instructions):
     conf = './examples/ephemeral_vectorstore_config.yaml'
     results = [] 
     for endpoint_instructs in list_of_instructions['instructions']:
-        res = {}
         for endpoint, instructs in endpoint_instructs.items():
             for field_name, field_data in instructs['schema'].items():
                 for param_name, param_data in field_data['properties'].items():
-                    print(param_data)
+                    res = {}
                     result =_tool_call(conf, param_data['description'])
                     res['endpoint'] = endpoint
                     res['context_metadata'] = [context.metadata for context in result['context']]
                     res['api_calls'] = result['api_calls']
                     res['target_name'] = param_name
+                    res['output_df_name'] = field_name
                     results.append(res)        
-    print(results)
     return results
 
 if __name__ == "__main__":
