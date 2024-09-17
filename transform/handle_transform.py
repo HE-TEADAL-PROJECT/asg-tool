@@ -2,6 +2,7 @@ import json
 from acg.agents.tool_calling import apply_tool_calling 
 from acg import config
 from acg.retrieval import get_doc_for_call
+from acg.util import to_snake_case
 
 from acg.agents.build_connector import (
     _get_inference_model,
@@ -12,7 +13,6 @@ from acg.con_spec import (
     ArgLocationEnum,
     ArgSourceEnum,
     CallTypeEnum,
-    make_out_dataframes,
 )
 from acg.agents.context_retrievers import retrieve_tools_from_list
 from acg.executor.transform.decorator import tool_metadata_list
@@ -42,14 +42,20 @@ def _tool_call(
     final_state = apply_tool_calling(state)
     return final_state
 
+def _get_doc_for_call(call_name: str, context_metadata: dict):
+    for doc in context_metadata:
+        doc_call = f"{to_snake_case(doc['tag'])}.{doc['operation_id']}"
+        if call_name == doc_call:
+            return doc
+
 def add_export_section(endpoint_name, con_spec, results):
     # assuming only one
     endpoint_transform = next((res for res in results if res['endpoint'] == endpoint_name), None)
     if endpoint_transform is None:
         return json.dumps(con_spec)
     for call in endpoint_transform['api_calls']:
-        context_doc = get_doc_for_call(call.name, endpoint_transform['context'])
-        doc = context_doc.metadata
+        context_doc = _get_doc_for_call(call.name, endpoint_transform['context_metadata'])
+        doc = context_doc
         args = {}
         list_args = []
         ref_params = json.loads(doc["parameters"])
@@ -65,14 +71,16 @@ def add_export_section(endpoint_name, con_spec, results):
                     args["value"] = call.parameters[param]
                 args["type"] = ref_params[param]["type"]
                 list_args.append(args)
-    dataframe = list(con_spec['spec']['output']['data'].keys())[0]
+    # dataframe = list(con_spec['spec']['output']['data'].keys())[0]['path']
+    dataframe='.'
+    target_field = endpoint_transform['target_name']
     #dataframe = make_out_dataframes(endpoint_transform_inf['api_calls'][-1],endpoint_transform_inf["context"])
     exports = {
     'exports': {
         'MyoutputDF': {
             'dataframe': dataframe,
             'fields': {
-                'target': [
+                target_field: [
                     {
                         'function': doc['operation_id'],
                         'description': doc['description'],
@@ -84,7 +92,7 @@ def add_export_section(endpoint_name, con_spec, results):
             }
         }
     for param in list_args:
-        exports['exports']['MyoutputDF']['fields']['target'][0]['params'][param['name']] = param['value']
+        exports['exports']['MyoutputDF']['fields'][target_field][0]['params'][param['name']] = param['value']
     con_spec['spec']['output']['exports'] = exports['exports']
     return json.dumps(con_spec)
 
@@ -142,14 +150,19 @@ def create_spec_section(endpoint, base_url, apiKey, auth, path_params, query_par
 def handle_transform_instructions(list_of_instructions):
     conf = './examples/ephemeral_vectorstore_config.yaml'
     results = [] 
-    for instruction in list_of_instructions:
+    for endpoint_instructs in list_of_instructions['instructions']:
         res = {}
-        endpoint, instruct = instruction.split(':')
-        result =_tool_call(conf, instruct)
-        res['endpoint'] = endpoint
-        res['context'] = result['context']
-        res['api_calls'] = result['api_calls']
-        results.append(res)        
+        for endpoint, instructs in endpoint_instructs.items():
+            for field_name, field_data in instructs['schema'].items():
+                for param_name, param_data in field_data['properties'].items():
+                    print(param_data)
+                    result =_tool_call(conf, param_data['description'])
+                    res['endpoint'] = endpoint
+                    res['context_metadata'] = [context.metadata for context in result['context']]
+                    res['api_calls'] = result['api_calls']
+                    res['target_name'] = param_name
+                    results.append(res)        
+    print(results)
     return results
 
 if __name__ == "__main__":

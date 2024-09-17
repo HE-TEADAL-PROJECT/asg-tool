@@ -1,0 +1,18 @@
+instructions:
+  - getStopById:
+      schema:
+          Stop:
+              type: object
+              properties:
+                stop_id:
+                    type: integer
+                    example: 101
+                    description: "The stop_id for this stop"
+                stop_lat_lon:
+                    type: number
+                    example: 37.50755595
+                    description: "Concatenated stop_lat with stop_lon for this stop"
+              required:
+              - stop_id
+              - stop_name
+              - stop_lat_lon
