@@ -50,50 +50,53 @@ def _get_doc_for_call(call_name: str, context_metadata: dict):
 
 def add_export_section(endpoint_name, con_spec, results):
     # assuming only one
-    endpoint_transform = next((res for res in results if res['endpoint'] == endpoint_name), None)
-    if endpoint_transform is None:
+    endpoint_transforms = [res for res in results if res['endpoint'] == endpoint_name]
+    if endpoint_transforms == []:
         return json.dumps(con_spec)
-    for call in endpoint_transform['api_calls']:
-        context_doc = _get_doc_for_call(call.name, endpoint_transform['context_metadata'])
-        doc = context_doc
-        args = {}
-        list_args = []
-        ref_params = json.loads(doc["parameters"])
-        for param, props in ref_params.items():
-            if param == 'df':
-                continue
-            if param in call.parameters or (
-                "required" in props and props["required"]
-            ):
-                args = {}
-                args["name"] = param
-                if param in call.parameters:
-                    args["value"] = call.parameters[param]
-                args["type"] = ref_params[param]["type"]
-                list_args.append(args)
-    # dataframe = list(con_spec['spec']['output']['data'].keys())[0]['path']
     dataframe='.'
-    target_field = endpoint_transform['target_name']
-    MyoutputDF = endpoint_transform['output_df_name'] 
-    #dataframe = make_out_dataframes(endpoint_transform_inf['api_calls'][-1],endpoint_transform_inf["context"])
+    output_df = endpoint_transforms[0]['output_df_name'] 
     exports = {
     'exports': {
-        MyoutputDF: {
+        output_df: {
             'dataframe': dataframe,
             'fields': {
-                target_field: [
-                    {
-                        'function': doc['operation_id'],
-                        'description': doc['description'],
-                        'params': {}
-                    }
-                    ]
                     }
                 }
             }
         }
-    for param in list_args:
-        exports['exports'][MyoutputDF]['fields'][target_field][0]['params'][param['name']] = param['value']
+    for endpoint_transform in endpoint_transforms:  
+        target_field = endpoint_transform['target_name']  
+        for call in endpoint_transform['api_calls']:
+            context_doc = _get_doc_for_call(call.name, endpoint_transform['context_metadata'])
+            doc = context_doc
+            args = {}
+            list_args = []
+            ref_params = json.loads(doc["parameters"])
+            for param, props in ref_params.items():
+                if param == 'df':
+                    continue
+                if param in call.parameters or (
+                    "required" in props and props["required"]
+                ):
+                    args = {}
+                    args["name"] = param
+                    if param in call.parameters:
+                        args["value"] = call.parameters[param]
+                    args["type"] = ref_params[param]["type"]
+                    list_args.append(args)
+
+            functions_param_section = []
+            func_section = {
+                            'function': doc['operation_id'],
+                            'description': doc['description'],
+                            'params': {}
+            }
+            for param in list_args:
+                func_section['params'][param['name']] = param['value']
+                #functions_param_section.append(func_section)
+            functions_param_section.append(func_section)
+
+        exports['exports'][output_df]['fields'][target_field] = functions_param_section
     con_spec['spec']['output']['exports'] = exports['exports']
     return json.dumps(con_spec)
 
