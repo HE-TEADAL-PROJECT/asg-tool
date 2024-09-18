@@ -26,7 +26,7 @@ def concatenate_fields(df, col1, col2, output):
         df (any): input dataframe.
         col1 (str) : The first column.
         col2 (str) : The second column.
-        output (str) : the new column name.
+        output (str) : the new column name, the target.
     Returns:
         df with new output column of the concatenation of col1 and col2
     """

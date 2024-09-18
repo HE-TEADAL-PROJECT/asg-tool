@@ -27,14 +27,11 @@ def render_fastapi_template(output_file, endpoints, name_suffix, results):
 
 def generate_app_for_spec(spec_file_name):
     openapi_spec = load_openapi_spec(spec_file_name)
-    endpoints = parse_endpoints(openapi_spec)
-    
-
     with open('transform/instructions.yaml', 'r') as f:
         list_of_instructions = yaml.load(f, Loader=yaml.SafeLoader)
+    endpoints = parse_endpoints(openapi_spec, list_of_instructions)
    
     name_suffix = spec_file_name.split('yaml')[0].split('/')[2].split('.')[0]
-    #spec = create_spec(endpoints)
     results = handle_transform_instructions(list_of_instructions)
     render_fastapi_template(f"fast_api_from_spec/generated_fastapi_app_{name_suffix}.py", endpoints, name_suffix, results)
 

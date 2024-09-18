@@ -11,8 +11,8 @@ app = FastAPI()
 
 # Define FastAPI endpoints
 {% for endpoint in endpoints %}
-@app.{{ endpoint.method }}("{{ endpoint.path }}")
-async def {{ endpoint.name }}({% for param in endpoint.parameters %}{{ param.name }}: {% if param.type == 'string' %}str{% elif param.type == 'integer' %}int{% elif param.type == 'boolean' %}bool{% elif param.type == 'number' %}float{% else %}Any{% endif %}{% if param.nullable %} = None{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}):
+@app.{{ endpoint.method }}("{{ endpoint.sfdp_endpoint_path }}")
+async def {{ endpoint.sfdp_endpoint_name }}({% for param in endpoint.parameters %}{{ param.name }}: {% if param.type == 'string' %}str{% elif param.type == 'integer' %}int{% elif param.type == 'boolean' %}bool{% elif param.type == 'number' %}float{% else %}Any{% endif %}{% if param.nullable %} = None{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}):
     """
     {{ endpoint.description }}
     """
@@ -27,8 +27,11 @@ async def {{ endpoint.name }}({% for param in endpoint.parameters %}{{ param.nam
         {%- endfor %}
     }
     # Create Yaml and run executor
-    con_spec = handle_transform.create_spec_section({{endpoint}}, '{{teadal_server}}', "1234", "apiToken", path_params, query_params)
-    full_spec = handle_transform.add_export_section('{{endpoint.name}}', con_spec, {{results}})
+    endpoint_data = {{endpoint}}
+    con_spec = handle_transform.create_spec_section(endpoint_data, '{{teadal_server}}', "1234", "apiToken", path_params, query_params)
+
+    transformations_instructions = {{results}}
+    full_spec = handle_transform.add_export_section('{{endpoint.sfdp_endpoint_name}}', con_spec, transformations_instructions)
     res = exec.run_from_spec_string(full_spec)
     try:
         response_data = {key: df.to_dict(orient='records') for key, df in res.items()}

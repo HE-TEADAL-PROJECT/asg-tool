@@ -49,7 +49,7 @@ def _get_doc_for_call(call_name: str, context_metadata: dict):
             return doc
 
 def add_export_section(endpoint_name, con_spec, results):
-    # assuming only one
+    print(results)
     endpoint_transforms = [res for res in results if res['endpoint'] == endpoint_name]
     if endpoint_transforms == []:
         return json.dumps(con_spec)
@@ -154,12 +154,12 @@ def create_spec_section(endpoint, base_url, apiKey, auth, path_params, query_par
 def handle_transform_instructions(list_of_instructions):
     conf = './examples/ephemeral_vectorstore_config.yaml'
     results = [] 
-    for endpoint_instructs in list_of_instructions['instructions']:
+    for endpoint_instructs in list_of_instructions['sfdp_endpoints']:
         for endpoint, instructs in endpoint_instructs.items():
             for field_name, field_data in instructs['schema'].items():
                 for param_name, param_data in field_data['properties'].items():
                     res = {}
-                    result =_tool_call(conf, param_data['description'])
+                    result =_tool_call(conf, param_data['description'] + f" to target: {param_name}")
                     res['endpoint'] = endpoint
                     res['context_metadata'] = [context.metadata for context in result['context']]
                     res['api_calls'] = result['api_calls']
