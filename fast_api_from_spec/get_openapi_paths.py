@@ -72,6 +72,7 @@ def parse_endpoints(openapi_spec, instructions):
                             "method": method,
                             "path": path,
                             "sfdp_endpoint_name": sfdp_endpoint_name,
+                            "sfdp_endpoint_path": sfdp_endpoint_path,
                             "name": details["operationId"],
                             "parameters": parameters,
                             "description": details.get("description", ""),
