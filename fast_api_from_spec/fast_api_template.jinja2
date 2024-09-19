@@ -34,7 +34,7 @@ async def {{ endpoint.sfdp_endpoint_name }}({% for param in endpoint.parameters 
     full_spec = handle_transform.add_export_section('{{endpoint.sfdp_endpoint_name}}', con_spec, transformations_instructions)
     res = exec.run_from_spec_string(full_spec)
     try:
-        response_data = {key: df.to_dict(orient='records') for key, df in res.items()}
+        response_data = {key: (df.dropna()).to_dict(orient='records') for key, df in res.items()}
     except:
         # In case no transformations, return json.
         return JSONResponse(res['.'])

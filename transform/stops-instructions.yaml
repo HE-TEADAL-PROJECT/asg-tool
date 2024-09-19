@@ -1,5 +1,5 @@
-sfdp_endpoints: #change to sfdp_endpoints
-  - sfdp_endpoint:
+sfdp_endpoints:
+  - stops_endpoint:
       fdp_path: /stops/stop_id/{stop_id}
       sfdp_path: /stop_id/{stop_id}
       schema:
@@ -9,12 +9,8 @@ sfdp_endpoints: #change to sfdp_endpoints
                 stop_ID:
                     type: integer
                     example: 101
-                    description: "map stop_id" #change to instruction
+                    description: "map stop_id"
                 stop_full_name:
                     type: string
                     example: Martiri LibertĂ SaittaMarshall
                     description: "Concatenated stop_name with parent_station for this stop"    
-              required:
-              - stop_id
-              - stop_name
-              - stop_lat_lon
