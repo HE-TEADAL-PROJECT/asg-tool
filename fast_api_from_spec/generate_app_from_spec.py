@@ -1,17 +1,19 @@
-from get_openapi_paths import load_openapi_spec, parse_endpoints
 import os
 import argparse
-
-from jinja2 import Environment, FileSystemLoader
 import sys
 import yaml
+
+from jinja2 import Environment, FileSystemLoader
+
+from get_openapi_paths import load_openapi_spec, parse_endpoints
+
 
 sys.path.append("./")
 from transform.handle_transform import handle_transform_instructions
 
 
 def render_fastapi_template(
-    output_file, endpoints, name_suffix, results, teadal_server
+    output_file, endpoints, name_suffix, results, teadal_server, api_key
 ):
     env = Environment(
         loader=FileSystemLoader("."), extensions=["jinja2.ext.loopcontrols"]
@@ -21,6 +23,7 @@ def render_fastapi_template(
         "endpoints": endpoints,
         "teadal_server": teadal_server + name_suffix,
         "results": results,
+        "apiKey": api_key,
     }
 
     rendered_content = template.render(data)
@@ -29,7 +32,7 @@ def render_fastapi_template(
         file.write(rendered_content)
 
 
-def generate_app_for_spec(spec_file_name, instructions_file, teadal_server):
+def generate_app_for_spec(spec_file_name, instructions_file, teadal_server, api_key):
     openapi_spec = load_openapi_spec(spec_file_name)
     with open(instructions_file, "r") as f:
         list_of_instructions = yaml.load(f, Loader=yaml.SafeLoader)
@@ -42,6 +45,7 @@ def generate_app_for_spec(spec_file_name, instructions_file, teadal_server):
         name_suffix,
         results,
         teadal_server,
+        api_key,
     )
 
 
@@ -69,11 +73,19 @@ if __name__ == "__main__":
         "-fdp_server", type=str, required=True, help="The FDP server URL"
     )
 
+    parser.add_argument(
+        "-k", 
+        type=str, 
+        default="DUMMY_KEY", 
+        help="Optional API key. Defaults to 'DUMMY_KEY'."
+    )
+
     args = parser.parse_args()
 
     spec_path = args.spec
     instructions_file = args.i
     fdp_server = args.fdp_server
+    api_key = args.k  # Optional key, defaults to 'DUMMY_KEY'
 
     # Check if the spec_path is a directory or a single file
     if os.path.isdir(spec_path):
@@ -81,10 +93,10 @@ if __name__ == "__main__":
         specs_list = os.listdir(spec_path)
         for spec in specs_list:
             generate_app_for_spec(
-                os.path.join(spec_path, spec), instructions_file, fdp_server
+                os.path.join(spec_path, spec), instructions_file, fdp_server, api_key
             )
     elif os.path.isfile(spec_path):
         # If it's a single file, generate app for that specific file
-        generate_app_for_spec(spec_path, instructions_file, fdp_server)
+        generate_app_for_spec(spec_path, instructions_file, fdp_server, api_key)
     else:
         print(f"Error: {spec_path} is neither a valid directory nor a file.")

@@ -1,7 +1,6 @@
 import json
 from acg.agents.tool_calling import apply_tool_calling
 from acg import config
-from acg.retrieval import get_doc_for_call
 from acg.util import to_snake_case
 
 from acg.agents.build_connector import (
@@ -27,6 +26,9 @@ def _tool_call(
     config_file: str,
     query: str,
 ) -> dict:
+    """
+    Make a call for GIN tool calling with the tools
+    """
     conf = config.import_config(config_file)
     inference_model = _get_inference_model("gen", conf)
     context = retrieve_tools_from_list(query, config_file, tool_metadata_list)
@@ -53,10 +55,10 @@ def _get_doc_for_call(call_name: str, context_metadata: dict):
 
 
 def add_export_section(endpoint_name, con_spec, results):
-    print(results)
+    """Adds the export section to con_spec from the results calculated from the instuctions"""
     endpoint_transforms = [res for res in results if res["endpoint"] == endpoint_name]
     if endpoint_transforms == []:
-        return json.dumps(con_spec)
+        return json.dumps(con_spec, indent=3)
     dataframe = "."
     output_df = endpoint_transforms[0]["output_df_name"]
     exports = {"exports": {output_df: {"dataframe": dataframe, "fields": {}}}}
@@ -96,10 +98,11 @@ def add_export_section(endpoint_name, con_spec, results):
 
         exports["exports"][output_df]["fields"][target_field] = functions_param_section
     con_spec["spec"]["output"]["exports"] = exports["exports"]
-    return json.dumps(con_spec)
+    return json.dumps(con_spec, indent=3)
 
 
 def create_spec_section(endpoint, base_url, apiKey, auth, path_params, query_params):
+    """Creates the connector spec for calling the fdp API"""
     apicall = {
         "type": CallTypeEnum.URL,
     }
@@ -129,7 +132,7 @@ def create_spec_section(endpoint, base_url, apiKey, auth, path_params, query_par
         "metadata": {
             "name": "TBD",
             "description": "TBD",
-            "inputPrompt": "BLABLABALBA",
+            "inputPrompt": "DUMMY PROMPT - SPEC IS CREATED STATICALLY",
         },
         "spec": {
             "apiCalls": apicalls_dict,
@@ -174,8 +177,3 @@ def handle_transform_instructions(list_of_instructions):
                     res["output_df_name"] = field_name
                     results.append(res)
     return results
-
-
-if __name__ == "__main__":
-    list_of_instructions = ["Rename column id to identifier"]
-    handle_transform_instructions(list_of_instructions)

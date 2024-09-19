@@ -1,4 +1,3 @@
-import sys
 import yaml
 from acg.util import ref_resolver
 
