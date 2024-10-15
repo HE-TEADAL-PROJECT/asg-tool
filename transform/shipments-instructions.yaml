@@ -14,8 +14,19 @@ sfdp_endpoints:
                       type: integer
                       example: 3
                       description: "the month where it falls in  4th quarter"
+  - another_shipments_endpoint:
+        fdp_path: /shipments
+        sfdp_path: /name-id
+        schema:
+            Customer:
+                type: object
+                properties:
                   customer_name_id:
                       type: string
                       example: John
                       description: "Concatenated customer_name with customer_id"
+                  client_name:
+                      type: integer
+                      example: 101
+                      description: "map customer_name"     
 

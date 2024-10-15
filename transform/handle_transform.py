@@ -1,20 +1,17 @@
 import json
-from acg.agents.tool_calling import apply_tool_calling
-from acg import config
-from acg.util import to_snake_case
+from gin.gen.agents.tool_calling import apply_tool_calling
+import gin.gen.config
+from gin.gen.util import to_snake_case
+import gin.gen.config
 
-from acg.agents.build_connector import (
-    _get_inference_model,
-    _get_missing_value_int,
-)
 
-from acg.con_spec import (
+from gin.gen.con_spec import (
     ArgLocationEnum,
     ArgSourceEnum,
     CallTypeEnum,
 )
-from acg.agents.context_retrievers import retrieve_tools_from_list
-from acg.executor.transform.decorator import tool_metadata_list
+from gin.gen.agents.context_retrievers import retrieve_tools_from_list
+from gin.gen.executor.transform.decorator import tool_metadata_list
 import sys
 
 sys.path.append("./transform")
@@ -29,15 +26,15 @@ def _tool_call(
     """
     Make a call for GIN tool calling with the tools
     """
-    conf = config.import_config(config_file)
-    inference_model = _get_inference_model("gen", conf)
+    conf = gin.gen.config.import_config(config_file)
+    inference_model = gin.gen.config.get_inference_model("gen", conf)
     context = retrieve_tools_from_list(query, config_file, tool_metadata_list)
     state = {
         "conf": conf,
         "inference_model": inference_model,
         "user_input": query,
         "issues": "",
-        "missing_value_int": _get_missing_value_int(query),
+        "missing_value_int": gin.gen.util.get_missing_value_int(query),
         "context": context,
         "api_calls": [],
         "feedback": "",

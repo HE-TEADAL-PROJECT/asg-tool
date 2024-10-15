@@ -1,4 +1,4 @@
-from acg.executor.transform.decorator import transform_tool
+from gin.gen.executor.transform.decorator import transform_tool
 
 
 @transform_tool

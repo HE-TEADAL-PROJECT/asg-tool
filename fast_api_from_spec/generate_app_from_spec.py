@@ -13,7 +13,7 @@ from transform.handle_transform import handle_transform_instructions
 
 
 def render_fastapi_template(
-    output_file, endpoints, name_suffix, results, teadal_server, api_key
+    output_file, endpoints, name_suffix, results, fdp_server, api_key
 ):
     env = Environment(
         loader=FileSystemLoader("."), extensions=["jinja2.ext.loopcontrols"]
@@ -21,7 +21,7 @@ def render_fastapi_template(
     template = env.get_template("fast_api_from_spec/fast_api_template.jinja2")
     data = {
         "endpoints": endpoints,
-        "teadal_server": teadal_server + name_suffix,
+        "teadal_server": fdp_server + name_suffix,
         "results": results,
         "apiKey": api_key,
     }
@@ -32,7 +32,7 @@ def render_fastapi_template(
         file.write(rendered_content)
 
 
-def generate_app_for_spec(spec_file_name, instructions_file, teadal_server, api_key):
+def generate_app_for_spec(spec_file_name, instructions_file, fdp_server, api_key):
     openapi_spec = load_openapi_spec(spec_file_name)
     with open(instructions_file, "r") as f:
         list_of_instructions = yaml.load(f, Loader=yaml.SafeLoader)
@@ -44,7 +44,7 @@ def generate_app_for_spec(spec_file_name, instructions_file, teadal_server, api_
         endpoints,
         name_suffix,
         results,
-        teadal_server,
+        fdp_server,
         api_key,
     )
 

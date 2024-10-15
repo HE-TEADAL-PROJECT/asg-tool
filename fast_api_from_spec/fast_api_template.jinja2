@@ -3,8 +3,8 @@ from fastapi.responses import JSONResponse
 
 from transform import handle_transform
 
-from acg.executor import exec
-from acg.types import ApiCallInf,ApiCallIssues
+from gin.gen.executor import exec
+from gin.common.types import ApiCallInf,ApiCallIssues
 
 app = FastAPI()
 
