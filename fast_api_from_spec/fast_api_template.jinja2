@@ -1,10 +1,8 @@
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 
-from transform import handle_transform
 
 from gin.gen.executor import exec
-from gin.common.types import ApiCallInf,ApiCallIssues
 
 app = FastAPI()
 
@@ -26,12 +24,19 @@ async def {{ endpoint.sfdp_endpoint_name }}({% for param in endpoint.parameters 
         {%- endfor %}
     }
     # Create Yaml and run executor
-    endpoint_data = {{endpoint}}
-    con_spec = handle_transform.create_spec_section(endpoint_data, '{{teadal_server}}', '{{apiKey}}', "apiToken", path_params, query_params)
+    full_spec = {{endpoints_full_connectors_specs[endpoint.sfdp_endpoint_name]}}
+    for i, param in enumerate(path_params):
+        if full_spec["spec"]["apiCalls"]["getStopById"]["arguments"][i]["argLocation"] == 'parameter':
+            full_spec["spec"]["apiCalls"]["{{endpoint.name}}"]["arguments"][i]["value"] = path_params[param]
 
-    transformations_instructions = {{results}}
-    full_spec = handle_transform.add_export_section('{{endpoint.sfdp_endpoint_name}}', con_spec, transformations_instructions)
-    res = exec.run_from_spec_string(full_spec)
+    for i, param in enumerate(query_params):
+        if full_spec["spec"]["apiCalls"]["getStopById"]["arguments"][i]["argLocation"] == 'header':
+            full_spec["spec"]["apiCalls"]["{{endpoint.name}}"]["arguments"][i]["value"] = query_params[param] 
+
+    spec_string = f"""{full_spec}"""
+
+    
+    res = exec.run_from_spec_string(spec_string)
     try:
         response_data = {key: (df.dropna()).to_dict(orient='records') for key, df in res.items()}
     except:

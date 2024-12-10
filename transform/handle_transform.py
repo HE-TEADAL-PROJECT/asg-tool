@@ -27,7 +27,7 @@ def _tool_call(
     Make a call for GIN tool calling with the tools
     """
     conf = gin.gen.config.import_config(config_file)
-    inference_model = gin.gen.config.get_inference_model("gen", conf)
+    inference_model = gin.gen.config.get_model_def(conf)
     context = retrieve_tools_from_list(query, config_file, tool_metadata_list)
     state = {
         "conf": conf,
@@ -114,7 +114,7 @@ def create_spec_section(endpoint, base_url, apiKey, auth, path_params, query_par
         if param["name"] in path_params.keys():
             args["name"] = param["name"]
             args["source"] = ArgSourceEnum.CONSTANT
-            args["value"] = path_params[param["name"]]
+            args["value"] = f'path_params[{param["name"]}]'
             args["type"] = param["type"]
             args["argLocation"] = ArgLocationEnum.PARAMETER
         # query params
@@ -139,7 +139,7 @@ def create_spec_section(endpoint, base_url, apiKey, auth, path_params, query_par
                 "data": {
                     endpoint["response_model"]["name"]: {
                         "api": endpoint["name"],
-                        "metadata": None,
+                        "metadata": [],
                         "path": ".",
                     }
                 },  # should be for all

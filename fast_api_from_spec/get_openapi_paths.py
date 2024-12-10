@@ -40,13 +40,17 @@ def parse_endpoints(openapi_spec, instructions):
                     }
                     for param in details.get("parameters", [])
                 ]
-                response_ref = details["responses"]["200"]["content"]["application/json"][
+                response_model_spec = {}
+                if "$ref" in details["responses"]["200"]["content"]["application/json"][
                     "schema"
-                ]["$ref"]
-                response_model_name = response_ref.split("/")[-1]
-                response_model_spec = ref_resolver.resolve_ref_for_object(
-                    openapi_spec, openapi_spec["components"]["schemas"][response_model_name]
-                )
+                ]:
+                    response_ref = details["responses"]["200"]["content"]["application/json"][
+                        "schema"
+                    ]["$ref"]
+                    response_model_name = response_ref.split("/")[-1]
+                    response_model_spec = ref_resolver.resolve_ref_for_object(
+                        openapi_spec, openapi_spec["components"]["schemas"][response_model_name]
+                    )
                 if "properties" in response_model_spec:
                     if sfdp_endpoint_name != "":
                         endpoints.append(

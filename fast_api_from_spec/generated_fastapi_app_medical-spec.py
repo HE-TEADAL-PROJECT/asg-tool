@@ -8,13 +8,12 @@ app = FastAPI()
 
 # Define FastAPI endpoints
 
-@app.get("/stop_id/{stop_id}")
-async def stops_endpoint(stop_id: str):
+@app.get("/persons_above_30")
+async def persons_endpoint():
     """
-    Returns the data of a stop given its unique identifier.
+    The whole 'Person' dataset will be returned. No parameters are needed.
     """
     path_params = {
-        "stop_id": stop_id
     }
     query_params = {
     }
@@ -29,53 +28,44 @@ async def stops_endpoint(stop_id: str):
    },
    "spec": {
       "apiCalls": {
-         "getStopById": {
+         "GetPersonsAll": {
             "type": "url",
-            "endpoint": "/stops/stop_id/{stop_id}",
+            "endpoint": "/persons",
             "method": "get",
-            "arguments": [
-               {
-                  "name": "stop_id",
-                  "source": "constant",
-                  "value": "path_params[stop_id]",
-                  "type": "string",
-                  "argLocation": "parameter"
-               }
-            ]
+            "arguments": []
          }
       },
       "output": {
          "execution": "",
          "runtimeType": "python",
          "data": {
-            "Stop": {
-               "api": "getStopById",
+            "Observation": {
+               "api": "GetPersonsAll",
                "metadata": [],
                "path": "."
             }
          },
          "exports": {
-            "Stop": {
+            "Person": {
                "dataframe": ".",
                "fields": {
-                  "stop_ID": [
+                  "person_ID": [
                      {
                         "function": "map_field",
                         "description": "map fields or change names from source to target.",
                         "params": {
-                           "source": "stop_id",
-                           "target": "stop_ID"
+                           "source": "person_id",
+                           "target": "person_ID"
                         }
                      }
                   ],
-                  "stop_full_name": [
+                  "person_age": [
                      {
-                        "function": "concatenate_fields",
-                        "description": "concatenate Two fields.",
+                        "function": "persons_above_age",
+                        "description": "Filters a DataFrame to return rows where the age\n      (calculated from year_of_birth, month_of_birth,day_of_birth) is bigger than the given input_age.",
                         "params": {
-                           "col1": "stop_name",
-                           "col2": "parent_station",
-                           "output": "stop_full_name"
+                           "age": 30,
+                           "target": "person_age"
                         }
                      }
                   ]
@@ -86,7 +76,7 @@ async def stops_endpoint(stop_id: str):
    },
    "servers": [
       {
-         "url": "http://localhost:8003/"
+         "url": "http://medicine01.teadal.ubiwhere.com/fdp-medicine-node01"
       }
    ],
    "apiKey": "DUMMY_KEY",
@@ -94,11 +84,11 @@ async def stops_endpoint(stop_id: str):
 }
     for i, param in enumerate(path_params):
         if full_spec["spec"]["apiCalls"]["getStopById"]["arguments"][i]["argLocation"] == 'parameter':
-            full_spec["spec"]["apiCalls"]["getStopById"]["arguments"][i]["value"] = path_params[param]
+            full_spec["spec"]["apiCalls"]["GetPersonsAll"]["arguments"][i]["value"] = path_params[param]
 
     for i, param in enumerate(query_params):
         if full_spec["spec"]["apiCalls"]["getStopById"]["arguments"][i]["argLocation"] == 'header':
-            full_spec["spec"]["apiCalls"]["getStopById"]["arguments"][i]["value"] = query_params[param] 
+            full_spec["spec"]["apiCalls"]["GetPersonsAll"]["arguments"][i]["value"] = query_params[param] 
 
     spec_string = f"""{full_spec}"""
 

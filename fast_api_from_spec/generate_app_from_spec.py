@@ -9,11 +9,12 @@ from get_openapi_paths import load_openapi_spec, parse_endpoints
 
 
 sys.path.append("./")
+from transform import handle_transform
 from transform.handle_transform import handle_transform_instructions
 
 
 def render_fastapi_template(
-    output_file, endpoints, name_suffix, results, fdp_server, api_key
+    output_file, endpoints, endpoints_full_connectors_specs
 ):
     env = Environment(
         loader=FileSystemLoader("."), extensions=["jinja2.ext.loopcontrols"]
@@ -21,9 +22,10 @@ def render_fastapi_template(
     template = env.get_template("fast_api_from_spec/fast_api_template.jinja2")
     data = {
         "endpoints": endpoints,
-        "teadal_server": fdp_server + name_suffix,
-        "results": results,
-        "apiKey": api_key,
+        #"teadal_server": fdp_server + name_suffix,
+        #"results": results,
+        #"apiKey": api_key,
+        "endpoints_full_connectors_specs": endpoints_full_connectors_specs,
     }
 
     rendered_content = template.render(data)
@@ -37,15 +39,27 @@ def generate_app_for_spec(spec_file_name, instructions_file, fdp_server, api_key
     with open(instructions_file, "r") as f:
         list_of_instructions = yaml.load(f, Loader=yaml.SafeLoader)
     endpoints = parse_endpoints(openapi_spec, list_of_instructions)
+    print(endpoints)
     name_suffix = spec_file_name.split("yaml")[0].split("\\")[2].split(".")[0]
     results = handle_transform_instructions(list_of_instructions)
+    path_params = {}
+    query_params= {}
+    endpoints_full_connectors_specs = {}
+    for endpoint in endpoints:
+        for param in endpoint['parameters'] :
+            if param['in'] == 'path':
+                path_params[param['name']] = param
+            if param['in'] == 'query':
+                query_params[param['name']]  = param
+
+        con_spec = handle_transform.create_spec_section(endpoint ,fdp_server, api_key, "apiToken", path_params, query_params)
+        full_spec = handle_transform.add_export_section(endpoint['sfdp_endpoint_name'], con_spec, results)
+        endpoints_full_connectors_specs[endpoint['sfdp_endpoint_name']] = full_spec
+
     render_fastapi_template(
         f"fast_api_from_spec/generated_fastapi_app_{name_suffix}.py",
         endpoints,
-        name_suffix,
-        results,
-        fdp_server,
-        api_key,
+        endpoints_full_connectors_specs,
     )
 
 
