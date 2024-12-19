@@ -62,12 +62,14 @@ models:
 
 generation:
   models:
-    - granite-code-inst8
+    - granite-code-inst20
   maxIter: 3
   features:
-    rag: true
+    rag: false
     staticChecks: true
-    llmEval: true
+    llmEval:
+       enabled: false
+       llm_as_judge_package_path: ''
   retrieval:
     models:
       - encoder-slate

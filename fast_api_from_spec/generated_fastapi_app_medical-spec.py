@@ -83,11 +83,11 @@ async def persons_endpoint():
    "auth": "apiToken"
 }
     for i, param in enumerate(path_params):
-        if full_spec["spec"]["apiCalls"]["getStopById"]["arguments"][i]["argLocation"] == 'parameter':
+        if full_spec["spec"]["apiCalls"]["GetPersonsAll"]["arguments"][i]["argLocation"] == 'parameter':
             full_spec["spec"]["apiCalls"]["GetPersonsAll"]["arguments"][i]["value"] = path_params[param]
 
     for i, param in enumerate(query_params):
-        if full_spec["spec"]["apiCalls"]["getStopById"]["arguments"][i]["argLocation"] == 'header':
+        if full_spec["spec"]["apiCalls"]["GetPersonsAll"]["arguments"][i]["argLocation"] == 'header':
             full_spec["spec"]["apiCalls"]["GetPersonsAll"]["arguments"][i]["value"] = query_params[param] 
 
     spec_string = f"""{full_spec}"""

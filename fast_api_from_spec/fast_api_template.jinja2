@@ -26,11 +26,11 @@ async def {{ endpoint.sfdp_endpoint_name }}({% for param in endpoint.parameters 
     # Create Yaml and run executor
     full_spec = {{endpoints_full_connectors_specs[endpoint.sfdp_endpoint_name]}}
     for i, param in enumerate(path_params):
-        if full_spec["spec"]["apiCalls"]["getStopById"]["arguments"][i]["argLocation"] == 'parameter':
+        if full_spec["spec"]["apiCalls"]["{{endpoint.name}}"]["arguments"][i]["argLocation"] == 'parameter':
             full_spec["spec"]["apiCalls"]["{{endpoint.name}}"]["arguments"][i]["value"] = path_params[param]
 
     for i, param in enumerate(query_params):
-        if full_spec["spec"]["apiCalls"]["getStopById"]["arguments"][i]["argLocation"] == 'header':
+        if full_spec["spec"]["apiCalls"]["{{endpoint.name}}"]["arguments"][i]["argLocation"] == 'header':
             full_spec["spec"]["apiCalls"]["{{endpoint.name}}"]["arguments"][i]["value"] = query_params[param] 
 
     spec_string = f"""{full_spec}"""

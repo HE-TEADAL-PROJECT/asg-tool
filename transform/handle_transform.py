@@ -1,17 +1,17 @@
 import json
+from gin.common.types import ToolDetails
 from gin.gen.agents.tool_calling import apply_tool_calling
 import gin.gen.config
-from gin.gen.util import to_snake_case
 import gin.gen.config
 
 
-from gin.gen.con_spec import (
+from gin.common.con_spec import (
     ArgLocationEnum,
     ArgSourceEnum,
     CallTypeEnum,
 )
-from gin.gen.agents.context_retrievers import retrieve_tools_from_list
-from gin.gen.executor.transform.decorator import tool_metadata_list
+from gin.gen.agents.context_retrievers import retrieve_tools_from_catalog
+from gin.executor.transform.decorator import tool_metadata_list
 import sys
 
 sys.path.append("./transform")
@@ -28,7 +28,7 @@ def _tool_call(
     """
     conf = gin.gen.config.import_config(config_file)
     inference_model = gin.gen.config.get_model_def(conf)
-    context = retrieve_tools_from_list(query, config_file, tool_metadata_list)
+    context = retrieve_tools_from_catalog(query, conf, tool_metadata_list, 'teadal')
     state = {
         "conf": conf,
         "inference_model": inference_model,
@@ -46,9 +46,11 @@ def _tool_call(
 
 def _get_doc_for_call(call_name: str, context_metadata: dict):
     for doc in context_metadata:
-        doc_call = f"{to_snake_case(doc['tag'])}.{doc['operation_id']}"
-        if call_name == doc_call:
-            return doc
+        tool_details_dict = json.loads(doc["tool_details_str"])
+        tool_details = ToolDetails(**tool_details_dict)
+        if call_name == tool_details.name:
+            print("Context doc for call %s: %s", call_name, doc)
+            return tool_details
 
 
 def add_export_section(endpoint_name, con_spec, results):
@@ -68,24 +70,24 @@ def add_export_section(endpoint_name, con_spec, results):
             doc = context_doc
             args = {}
             list_args = []
-            ref_params = json.loads(doc["parameters"])
-            for param, props in ref_params.items():
+            ref_params = doc.parameters
+            for param, param_detail in ref_params.items():
                 if param == "df":
                     continue
                 if param in call.parameters or (
-                    "required" in props and props["required"]
+                     param_detail.required
                 ):
                     args = {}
                     args["name"] = param
                     if param in call.parameters:
                         args["value"] = call.parameters[param]
-                    args["type"] = ref_params[param]["type"]
+                    args["type"] = param_detail.type
                     list_args.append(args)
 
             functions_param_section = []
             func_section = {
-                "function": doc["operation_id"],
-                "description": doc["description"],
+                "function": doc.name,
+                "description": doc.description,
                 "params": {},
             }
             for param in list_args:
