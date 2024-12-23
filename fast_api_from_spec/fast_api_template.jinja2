@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 
 
-from gin.gen.executor import exec
+from gin.executor import exec
 
 app = FastAPI()
 

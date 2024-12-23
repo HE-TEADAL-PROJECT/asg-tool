@@ -57,7 +57,7 @@ def generate_app_for_spec(spec_file_name, instructions_file, fdp_server, api_key
         endpoints_full_connectors_specs[endpoint['sfdp_endpoint_name']] = full_spec
 
     render_fastapi_template(
-        f"fast_api_from_spec/generated_fastapi_app_{name_suffix}.py",
+        f"generated_servers/generated_fastapi_app_{name_suffix}.py",
         endpoints,
         endpoints_full_connectors_specs,
     )

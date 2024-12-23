@@ -1,14 +1,4 @@
 aiPlatforms:
-  skylab:
-    platform: openai
-    credentials:
-      api_key: EMPTY
-      api_base: http://luigi.millennium.berkeley.edu:8000/v1
-  RITS:
-    platform: rits
-    credentials:
-      api_key: $RITS_APIKEY
-      api_base: https://inference-3scale-apicast-production.apps.rits.fmaas.res.ibm.com
   Watsonx:
     platform: watsonx
     credentials:
@@ -21,22 +11,7 @@ models:
     host: Watsonx
     parameters:
       truncate_input_tokens: 500
-  granite-uapi20:
-    id: ibm-granite/granite-20b-code-instruct-unified-api
-    host: RITS
-    parameters:
-      max_tokens: 1024
-      seed: 10
-      temperature: 0
   granite-code-inst20:
-    id: ibm/granite-20b-code-instruct
-    host: Watsonx
-    parameters:
-      decoding_method: greedy
-      max_new_tokens: 1024
-      random_seed: 10
-      temperature: 0
-  granite-code-inst8:
     id: ibm/granite-20b-code-instruct
     host: Watsonx
     parameters:
@@ -52,14 +27,6 @@ models:
         return_options:
           documents: true
           query: true
-  llama3-1-70:
-    id: meta-llama/llama-3-1-70b-instruct
-    host: RITS
-    parameters:
-      max_tokens: 1024
-      seed: 10
-      temperature: 0
-
 generation:
   models:
     - granite-code-inst20
@@ -69,7 +36,6 @@ generation:
     staticChecks: true
     llmEval:
        enabled: false
-       llm_as_judge_package_path: ''
   retrieval:
     models:
       - encoder-slate
@@ -77,6 +43,4 @@ generation:
     rerank:
       model: encoder-slate-documents-query
       topN : 4
-  evaluation:
-    models:
-     - llama3-1-70
+
