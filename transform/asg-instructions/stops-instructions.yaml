@@ -1,0 +1,16 @@
+sfdp_endpoints:
+  - stops_endpoint:
+      fdp_path: /stops/stop_id/{stop_id}
+      sfdp_path: /stop_id/{stop_id}
+      schema:
+          Stop:
+              type: object
+              properties:
+                stop_ID:
+                    type: integer
+                    example: 101
+                    description: "map stop_id"
+                stop_full_name:
+                    type: string
+                    example: Martiri LibertĂ SaittaMarshall
+                    description: "Concatenated stop_name with parent_station for this stop"    

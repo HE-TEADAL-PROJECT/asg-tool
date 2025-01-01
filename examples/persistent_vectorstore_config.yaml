@@ -1,35 +1,54 @@
-ai_platforms:
+aiPlatforms:
   BAM:
     platform: bam
-    api_key: $BAM_KEY
-    api_base: https://bam-api.res.ibm.com/
+    apiKey: $BAM_KEY
+    apiBase: https://bam-api.res.ibm.com/
 models:
   encoder-slate:
     id: ibm/slate.30m.english.rtrvr
     host: BAM
     parameters:
       truncate_input_tokens: true
-  granite-api:
+  granite-api20:
     id: ibm/granite-20b-code-instruct-unified-api
     host: BAM
     parameters:
       decoding_method: greedy
-      max_new_tokens: 4096
+      max_new_tokens: 1024
       random_seed: 10
       temperature: 0
+  granite-api8:
+    id: ibm/granite-8b-unified-api-model-v2
+    host: BAM
+    parameters:
+      decoding_method: greedy
+      max_new_tokens: 1024
+      random_seed: 10
+      temperature: 0
+  bge-large-en-v1:
+      id: baai/bge-large-en-v1.5
+      host: BAM
+      parameters:
+        truncate_input_tokens: true
+        return_options:
+          documents: true
+          query: true
 retrieval:
-  persistent_vector_store_dir: ./var/vs
+  persistentVectorStoreDir: ./var/vs
   models:
     - encoder-slate
-  top_k: 8
+  topK: 10
   rerank:
     model: bge-large-en-v1
     # (optional) Maximum number of results to return
-    top_n : 5
+    topN : 4
 
 generation:
   models:
-    - granite-api
-  retries: 5
-api_key: $INSTANA_KEY
+    - granite-api20
+  maxIter: 5
+evaluation:
+  models:
+   - llama3
+apiKey: $INSTANA_KEY
 auth: apiToken

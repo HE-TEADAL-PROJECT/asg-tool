@@ -1,13 +1,15 @@
 from fastapi import FastAPI
-import requests
 from fastapi.responses import JSONResponse
+
+
+from gin.executor import exec
 
 app = FastAPI()
 
 # Define FastAPI endpoints
 {% for endpoint in endpoints %}
-@app.{{ endpoint.method }}("{{ endpoint.path }}")
-async def {{ endpoint.name }}({% for param in endpoint.parameters %}{{ param.name }}: {% if param.type == 'string' %}str{% elif param.type == 'integer' %}int{% elif param.type == 'boolean' %}bool{% elif param.type == 'number' %}float{% else %}Any{% endif %}{% if param.nullable %} = None{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}):
+@app.{{ endpoint.method }}("{{ endpoint.sfdp_endpoint_path }}")
+async def {{ endpoint.sfdp_endpoint_name }}({% for param in endpoint.parameters %}{{ param.name }}: {% if param.type == 'string' %}str{% elif param.type == 'integer' %}int{% elif param.type == 'boolean' %}bool{% elif param.type == 'number' %}float{% else %}Any{% endif %}{% if param.nullable %} = None{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}):
     """
     {{ endpoint.description }}
     """
@@ -21,7 +23,24 @@ async def {{ endpoint.name }}({% for param in endpoint.parameters %}{{ param.nam
         "{{ param.name }}": {{ param.name }}{%- if not loop.last %},{%- endif %}
         {%- endfor %}
     }
-    response = requests.{{ endpoint.method }}("{{teadal_server}}{{ endpoint.path }}".format(**path_params), params=query_params)
-    response_data = response.json()
+    # Create Yaml and run executor
+    full_spec = {{endpoints_full_connectors_specs[endpoint.sfdp_endpoint_name]}}
+    for i, param in enumerate(path_params):
+        if full_spec["spec"]["apiCalls"]["{{endpoint.name}}"]["arguments"][i]["argLocation"] == 'parameter':
+            full_spec["spec"]["apiCalls"]["{{endpoint.name}}"]["arguments"][i]["value"] = path_params[param]
+
+    for i, param in enumerate(query_params):
+        if full_spec["spec"]["apiCalls"]["{{endpoint.name}}"]["arguments"][i]["argLocation"] == 'header':
+            full_spec["spec"]["apiCalls"]["{{endpoint.name}}"]["arguments"][i]["value"] = query_params[param] 
+
+    spec_string = f"""{full_spec}"""
+
+    
+    res = exec.run_from_spec_string(spec_string)
+    try:
+        response_data = {key: (df.dropna()).to_dict(orient='records') for key, df in res.items()}
+    except:
+        # In case no transformations, return json.
+        return JSONResponse(res['.'])
     return JSONResponse(response_data)
 {% endfor %}
