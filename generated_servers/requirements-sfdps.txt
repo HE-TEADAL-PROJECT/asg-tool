@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+pandas
+varsubst
+PyYAML
+langchain_core
+#git+ssh://git@github.ibm.com/<REPO>/executor-test.git
