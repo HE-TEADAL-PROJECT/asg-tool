@@ -4,4 +4,4 @@ pandas
 varsubst
 PyYAML
 langchain_core
-#git+ssh://git@github.ibm.com/<REPO>/executor-test.git
+git+ssh://git@github.ibm.com/Mohamed-Mahameed/executor_test.git
