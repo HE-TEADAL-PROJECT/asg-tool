@@ -1,5 +1,5 @@
 # Use a minimal Python runtime as the base image
-FROM registry.fedoraproject.org/f33/python3
+FROM registry.redhat.io/rhel9/python-312
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -12,7 +12,6 @@ RUN yum -y install -y git && rm -rf /var/lib/apt/lists/*
 RUN mkdir -p /root/.ssh && chmod 0700 /root/.ssh
 RUN ssh-keyscan -t rsa github.ibm.com >> /root/.ssh/known_hosts
 
-RUN /opt/app-root/bin/python3.9 -m pip install --upgrade pip
 # Install the Python dependencies
 COPY generated_servers /app/
 
