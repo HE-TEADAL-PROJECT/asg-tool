@@ -1,5 +1,5 @@
 # Use a minimal Python runtime as the base image
-FROM registry.redhat.io/rhel9/python-312
+FROM registry.redhat.io/ubi9/python-312
 
 # Set the working directory inside the container
 WORKDIR /app
