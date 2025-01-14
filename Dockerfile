@@ -1,5 +1,5 @@
 # Use a minimal Python runtime as the base image
-FROM python:3.11-slim
+FROM registry.fedoraproject.org/f33/python3
 
 # Set the working directory inside the container
 WORKDIR /app
@@ -7,18 +7,18 @@ WORKDIR /app
 
 COPY generated_servers /app/
 
+USER root
 
-
-RUN apt-get update && apt-get install -y  openssh-client git && rm -rf /var/lib/apt/lists/*
+RUN yum -y install -y git && rm -rf /var/lib/apt/lists/*
 
 # TODO, Fix adding the repo to requirements-sfdps.txt and install it via docker build.
-RUN mkdir -p -m 0700 ~/.ssh && ssh-keyscan github.ibm.com >> ~/.ssh/known_hosts
-RUN cat ~/.ssh/known_hosts
+RUN mkdir -p /root/.ssh && chmod 0700 /root/.ssh
+RUN ssh-keyscan -t rsa github.ibm.com >> /root/.ssh/known_hosts
 
 # Install the Python dependencies
-RUN --mount=type=ssh  pip install --no-cache-dir -r requirements-sfdps.txt
+RUN --mount=type=ssh,uid=1234  pip install --no-cache-dir -r requirements-sfdps.txt
 
-ENV PYTHONPATH="/app/executor_test/:$PYTHONPATH"
+ENV PYTHONPATH="/app/teadal_executor/:$PYTHONPATH"
 
 # Expose the application port
 EXPOSE 8000
