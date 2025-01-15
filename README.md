@@ -1,4 +1,6 @@
-# teadal-connectors
+# TEADAL-GIN-ASG
+  Create Shared Federated data product automatically using IBM's GIN solution.
+# project structure
 
 # Creation of FastAPI servers automatically.
  - From root dir Run generate_app_from_spec.py - this will generate a FastAPI

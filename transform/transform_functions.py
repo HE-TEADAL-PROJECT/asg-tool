@@ -1,8 +1,8 @@
 import datetime
-from gin.executor.transform.decorator import transform_tool
+from gin.common.tool_decorator import make_tool
 
 
-@transform_tool
+@make_tool
 def map_field(df, source, target):
     """
     map fields or change names from source to target.
@@ -18,7 +18,7 @@ def map_field(df, source, target):
     return df
 
 
-@transform_tool
+@make_tool
 def concatenate_fields(df, col1, col2, output):
     """
     concatenate Two fields.
@@ -36,7 +36,7 @@ def concatenate_fields(df, col1, col2, output):
     return df
 
 
-@transform_tool
+@make_tool
 def filter_by_year(df, year_col, input_year):
     """
     Filters a DataFrame to return rows where the year matches the given input_year.
@@ -51,7 +51,7 @@ def filter_by_year(df, year_col, input_year):
     """
     return df[df[year_col] == input_year]
 
-@transform_tool
+@make_tool
 def filter_by_quarter(df, month_col, quarter):
     """
     Filters a DataFrame to return rows where the month falls within the specified quarter.
@@ -88,7 +88,7 @@ def calculate_age(row):
     return age
 
 
-@transform_tool
+@make_tool
 def persons_above_age(df, age, target):
     """
     Filters a DataFrame to return rows where the age
