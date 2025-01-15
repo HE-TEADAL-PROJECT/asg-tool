@@ -1,6 +1,6 @@
 # TEADAL-GIN-ASG
   Create Shared Federated data product automatically using IBM's GIN solution.
-# project structure
+## project structure
 ```plaintext
 teadal-connectors/
 ├── src/                           # Source code files
@@ -57,13 +57,16 @@ teadal-connectors/
    python generate_sfdp.py -spec <PATH_TO_FDP_OPENAPI_SPEC> -i <SFDP_GENERATION_INSTRUCTION_FILE> -fdp_server <FDP_URL> -c <GIN_TEADAL_CONFIG_FILE>
    ```
 
-# Running the generated SFDP server
+## Running the generated SFDP server
 
- - Run the server using the command - uvicorn generated_servers.{{generated_fastapi_app_name}}:app --reload (where {{generated_fastapi_app}} is one of the generated FastAPI generated apps.)
+ - Run the server using the command - 
+  ```bash
+  uvicorn generated_servers.{{generated_fastapi_app_name}}:app --reload # where {{generated_fastapi_app}} is one of the generated FastAPI apps.
+  ```
  - The server will run on localhost port 8000.
  - From the browser or any rest client, send a request to the running server on localhost:
      for example: stops: http://localhost:8000/stops/
      the response will be returned as json.
 
-# Creating an image to run the SFDP server in a conatiner
+## Creating an image to run the SFDP server in a conatiner
 TODO
