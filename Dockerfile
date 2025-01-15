@@ -14,6 +14,7 @@ RUN ssh-keyscan -t rsa github.ibm.com >> /root/.ssh/known_hosts
 
 # Install the Python dependencies
 COPY generated_servers /app/
+COPY transform /app/
 
 RUN --mount=type=ssh  pip install --no-cache-dir -r requirements-sfdps.txt
 
