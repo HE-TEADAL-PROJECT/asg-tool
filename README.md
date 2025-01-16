@@ -71,5 +71,55 @@ teadal-connectors/
      the response will be returned as json.
 
 
+## ASG Specification file structure 
+
+This section describes the structure of the YAML file used for defining the mappings between SFDP and FDP endpoints, including schema definitions for the associated data.
+
+### Top-Level Structure
+
+- **`sfdp_endpoints`**: A list of endpoint mappings. Each item in this list represents a specific endpoint and its associated configurations.
+
+### Endpoint Mapping Structure
+
+Each endpoint mapping under `sfdp_endpoints` is a dictionary with the following keys:
+
+  - **`<endpoint_name>`**: The name of the endpoint (e.g., `stops_endpoint`).
+  - **`fdp_path`**: (String) The path to the FDP endpoint. It is a string with placeholders for dynamic segments (e.g., `/stops/stop_id/{stop_id}`).
+  - **`sfdp_path`**: (String) The path to the SFDP endpoint. It mirrors the FDP path with similar placeholders (e.g., `/stop_id/{stop_id}`).
+  - **`schema`**: A dictionary defining the schema for the data associated with the endpoint. This section describes the data types and structures expected for the response or request payloads.
+
+### Schema Structure
+
+The `schema` key contains one or more schema definitions. Each schema is a dictionary with the following keys:
+
+- **`<schema_name>`**: The name of the schema (e.g., `Stop`). It defines the structure of the data model.
+  - **`type`**: (String) The type of the schema. It is usually `object` to indicate a structured object.
+  - **`properties`**: A dictionary that defines the properties of the schema object. Each property has its own definition.
+
+#### Property Definition
+
+Each property in the `properties` dictionary has the following keys:
+
+- **`<property_name>`**: The name of the property (e.g.,`stop_full_name`). It identifies a specific field within the schema.
+  - **`type`**: (String) The data type of the property (e.g., `integer`, `string`). It defines the type of data this property holds.
+  - **`example`**: (Optional) An example value for the property. It illustrates a sample data value that conforms to the property's type.
+  - **`description`**: (String) A brief description of the property. It explains what the property represents and how is it constructred from the FDP endpoint's (fdp_path) ouput data model.
+
+## Example Structure
+
+```yaml
+sfdp_endpoints:
+  - <endpoint_name>:
+      fdp_path: <fdp_path_string>
+      sfdp_path: <sfdp_path_string>
+      schema:
+        <schema_name>:
+          type: object
+          properties:
+            <property_name>:
+              type: <property_type>
+              example: <example_value>
+              description: <property_description>
+
 ## Creating an image to run the SFDP server in a conatiner
 TODO
