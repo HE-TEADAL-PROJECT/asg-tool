@@ -1,4 +1,5 @@
 import json
+import os
 from gin.common.types import ToolDetails
 from gin.gen.agents.tool_calling import apply_tool_calling
 import gin.gen.config
@@ -10,13 +11,12 @@ from gin.common.con_spec import (
     ArgSourceEnum,
     CallTypeEnum,
 )
-from gin.gen.agents.context_retrievers import retrieve_tools_from_catalog
-from gin.executor.transform.decorator import tool_metadata_list
+from gin.gen.agents.tool_calling import simple_tool_calling
+from gin.common.tool_decorator import tool_metadata_list
+from gin.executor.transform.load_functions import load_user_functions
 import sys
 
 sys.path.append("./transform")
-
-import transform_functions
 
 
 def _tool_call(
@@ -26,22 +26,14 @@ def _tool_call(
     """
     Make a call for GIN tool calling with the tools
     """
-    conf = gin.gen.config.import_config(config_file)
-    inference_model = gin.gen.config.get_model_def(conf)
-    context = retrieve_tools_from_catalog(query, conf, tool_metadata_list, 'teadal')
-    state = {
-        "conf": conf,
-        "inference_model": inference_model,
-        "user_input": query,
-        "issues": "",
-        "missing_value_int": gin.gen.util.get_missing_value_int(query),
-        "context": context,
-        "api_calls": [],
-        "feedback": "",
-        "iter_count": 0,
-    }
-    final_state = apply_tool_calling(state)
-    return final_state
+    user_functions_dir = './transform'
+    load_user_functions(user_functions_dir)
+    functions = [transform.model_dump() for transform in tool_metadata_list]
+    return simple_tool_calling(
+    config_file,
+    functions,
+    query,
+    ) 
 
 
 def _get_doc_for_call(call_name: str, context_metadata: dict):
@@ -49,7 +41,7 @@ def _get_doc_for_call(call_name: str, context_metadata: dict):
         tool_details_dict = json.loads(doc["tool_details_str"])
         tool_details = ToolDetails(**tool_details_dict)
         if call_name == tool_details.name:
-            print("Context doc for call %s: %s", call_name, doc)
+            print(f"Context doc for call {call_name}: {doc}")
             return tool_details
 
 
@@ -74,6 +66,8 @@ def add_export_section(endpoint_name, con_spec, results):
             for param, param_detail in ref_params.items():
                 if param == "df":
                     continue
+                if param == 'required':
+                    continue
                 if param in call.parameters or (
                      param_detail.required
                 ):
@@ -81,7 +75,7 @@ def add_export_section(endpoint_name, con_spec, results):
                     args["name"] = param
                     if param in call.parameters:
                         args["value"] = call.parameters[param]
-                    args["type"] = param_detail.type
+                    args["type"] = param_detail["type"]
                     list_args.append(args)
 
             functions_param_section = []
@@ -156,8 +150,7 @@ def create_spec_section(endpoint, base_url, apiKey, auth, path_params, query_par
     return con_spec
 
 
-def handle_transform_instructions(list_of_instructions):
-    conf = "./examples/ephemeral_vectorstore_config.yaml"
+def handle_transform_instructions(list_of_instructions, conf):
     results = []
     for endpoint_instructs in list_of_instructions["sfdp_endpoints"]:
         for endpoint, instructs in endpoint_instructs.items():

@@ -86,7 +86,7 @@ async def stops_endpoint(stop_id: str):
    },
    "servers": [
       {
-         "url": "http://localhost:8003/"
+         "url": "http://medicine01.teadal.ubiwhere.com/fdp-medicine-node01"
       }
    ],
    "apiKey": "DUMMY_KEY",
