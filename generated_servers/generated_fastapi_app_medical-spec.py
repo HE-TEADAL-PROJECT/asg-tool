@@ -76,7 +76,7 @@ async def persons_endpoint():
    },
    "servers": [
       {
-         "url": "http://medicine01.teadal.ubiwhere.com/fdp-medicine-node01"
+         "url": "http://127.0.0.1:8003"
       }
    ],
    "apiKey": "DUMMY_KEY",
@@ -93,7 +93,7 @@ async def persons_endpoint():
     spec_string = f"""{full_spec}"""
 
     
-    res = exec.run_from_spec_string(spec_string)
+    res = exec.run_from_spec_string(spec_string, user_functions_path="/app/transform")
     try:
         response_data = {key: (df.dropna()).to_dict(orient='records') for key, df in res.items()}
     except:

@@ -13,7 +13,7 @@ teadal-connectors/
 │   └── gin-teadal-config.yaml     # default configuration file
 │
 ├── openapi-specs/                 # openAPI specification for FDP servers
-│   └── openapi_spec_example.yaml  # example openAPI specification in yaml format
+│   └── medical-spec.yaml          # example openAPI specification in yaml format
 │
 ├── transform/                     # Custom User's transfrom functions library 
 │   └── transform_function.py      # Each tool must be decorate with @make_tool and has full docstring
@@ -32,6 +32,7 @@ teadal-connectors/
 │
 └── requirements.txt               # List of dependencies
 ```
+
 
 ## How to Run
 
@@ -54,8 +55,9 @@ teadal-connectors/
 
 4. **Run the application**:
    ```bash
-   python generate_sfdp.py -spec <PATH_TO_FDP_OPENAPI_SPEC> -i <SFDP_GENERATION_INSTRUCTION_FILE> -fdp_server <FDP_URL> -c <GIN_TEADAL_CONFIG_FILE>
+   python src/generate_sfdp.py -spec <PATH_TO_FDP_OPENAPI_SPEC> -i <SFDP_GENERATION_INSTRUCTION_FILE> -fdp_server <FDP_URL> -c <GIN_TEADAL_CONFIG_FILE>
    ```
+
 
 ## Running the generated SFDP server
 
@@ -67,6 +69,7 @@ teadal-connectors/
  - From the browser or any rest client, send a request to the running server on localhost:
      for example: stops: http://localhost:8000/stops/
      the response will be returned as json.
+
 
 ## Creating an image to run the SFDP server in a conatiner
 TODO
