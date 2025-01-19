@@ -2,6 +2,8 @@ import os
 import argparse
 import sys
 import yaml
+import pprint
+from pathlib import Path
 
 from jinja2 import Environment, FileSystemLoader
 
@@ -34,14 +36,16 @@ def render_fastapi_template(
     with open(output_file, "w") as file:
         file.write(rendered_content)
 
-
 def generate_app_for_spec(spec_file_name, instructions_file, fdp_server, api_key, config_file_path):
     openapi_spec = load_openapi_spec(spec_file_name)
     with open(instructions_file, "r") as f:
         list_of_instructions = yaml.load(f, Loader=yaml.SafeLoader)
     endpoints = parse_endpoints(openapi_spec, list_of_instructions)
-    print(endpoints)
-    name_suffix = spec_file_name.split("yaml")[0].split("\\")[2].split(".")[0]
+    pprint.pprint(endpoints)
+    # name_suffix = spec_file_name.split("yaml")[0].split("\\")[2].split(".")[0] # does not work on lnx
+    # name_suffix = spec_file_name.split("yaml")[0].split(os.sep)[-1].split(".")[0] # fixed 
+    name_suffix = Path(spec_file_name).stem
+    print(f"name_suffix={name_suffix}") 
     results = handle_transform_instructions(list_of_instructions, config_file_path)
     path_params = {}
     query_params= {}

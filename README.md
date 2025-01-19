@@ -6,7 +6,7 @@ teadal-connectors/
 ├── src/                           # Source code files
 │   ├── generate_sfdp.py           # Main entry point of the application
 │
-├── asg-instructions/              # Example (input) folder contating ASG specification file for SFDP Generation
+├── asg-instructions/              # Example (input) folder containing ASG specification file for SFDP Generation
 │   ├── Medical-instructions.yaml  # Example SFDP generation instructions file
 │
 ├── config/                        # Configuration files
@@ -15,8 +15,8 @@ teadal-connectors/
 ├── openapi-specs/                 # openAPI specification for FDP servers
 │   └── medical-spec.yaml          # example openAPI specification in yaml format
 │
-├── transform/                     # Custom User's transfrom functions library 
-│   └── transform_function.py      # Each tool must be decorate with @make_tool and has full docstring
+├── transform/                     # Custom transform functions library 
+│   └── transform_function.py      # Each tool must be decorated with @make_tool and have a full docstring
 │
 ├── generated_servers/             # Output folder - FastAPI applications
 │   └── sfdp-server1.py            # FastAPI application code generated automatically
@@ -39,7 +39,7 @@ teadal-connectors/
 1. **Clone the repository**:
    ```bash
    git clone git@github.ibm.com:mc-connectors/teadal-connectors.git
-   cd teadal-connecotrs
+   cd teadal-connectors
    ```
 
 2. **Set up the virtual environment**:
@@ -49,11 +49,20 @@ teadal-connectors/
    ```
 
 3. **Install the dependencies**:
+
+Requires access to the corporate IBM github to pull GIN library.
    ```bash
    pip install -r requirements.txt
    ```
 
 4. **Run the application**:
+
+To generate the SFDP server application, you need to provide the following command line parameters:
+- The OpenAPI specification of the source FDP as `-spec` parameter
+- The URL of the source FDP as `-fdp_server` parameter
+- The ASG instructions file describing the SFDP to be generated as `-i` parameter
+- The ASG congiguration file required for accessing and configuring the OpenAI service, as `-c` parameter
+
    ```bash
    python src/generate_sfdp.py -spec <PATH_TO_FDP_OPENAPI_SPEC> -i <SFDP_GENERATION_INSTRUCTION_FILE> -fdp_server <FDP_URL> -c <GIN_TEADAL_CONFIG_FILE>
    ```
