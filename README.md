@@ -120,6 +120,22 @@ sfdp_endpoints:
               type: <property_type>
               example: <example_value>
               description: <property_description>
+```
 
 ## Creating an image to run the SFDP server in a conatiner
-TODO
+After creating the SFDP server, Dockerfile has the needed commands and copies the needed files to be able to run the server in a container (e.g copying the server, copying the user defined functions, installing the requirements to run the executor).
+
+From root folder, run the following:
+ ### building the image
+   Windows:
+   ```bash
+    DOCKER_BUILDKIT=1 docker build  --ssh default=<id_rsa_path>   --progress=plain   -t my-sfdp-app .
+   ```
+   Mac/Linux:
+   ```bash
+    docker build -ssh default -t my sfdp-app
+   ```
+ ### Running the image as a container
+  ```bash
+  docker run -p 8000:8000 my-sfdp-app
+  ```
