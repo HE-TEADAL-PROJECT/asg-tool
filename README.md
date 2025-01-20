@@ -69,6 +69,23 @@ teadal-connectors/
  - From the browser or any rest client, send a request to the running server on localhost:
      for example: stops: http://localhost:8000/stops/
      the response will be returned as json.
+   
+## Configuration File Structure
+
+### aiPlatforms
+Defines the configuration for the platforms where AI models will run, including the required credentials. Supported platforms include Ollama and IBM Watsonx (the latter requires special access).
+
+### models
+Specifies the configuration of AI models, detailing the platform (`aiPlatform`) on which the model is running and various model parameters, such as `max_new_tokens` and `temperature`.
+
+### generation
+Outlines the GIN operation modes, including the model ID (referenced from the `models` section) to be used, and the maximum number of retries allowed for the model to process a user query if static checks identify issues in the LLM's response.
+
+### features
+- **rag**: Enables or disables the Retrieval-Augmented Generation feature.
+- **staticChecks**: Conducts static checks to identify syntactic issues based on the context and the LLM's response.
+- **llmEval**: Provides LLM evaluation of the response (currently not supported).
+
 
 
 ## ASG Specification file structure 
