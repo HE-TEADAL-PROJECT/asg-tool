@@ -29,6 +29,7 @@ def parse_endpoints(openapi_spec, instructions):
                     sfdp_endpoint_name = key
                 if "sfdp_path" in content and content["fdp_path"] == path:
                     sfdp_endpoint_path = content["sfdp_path"]
+            sfdp_endpoint_description = content.get("sfdp_endpoint_description", "No description") 
             if path == content["fdp_path"]:
                 for method, details in methods.items():
                     parameters = [
@@ -70,7 +71,7 @@ def parse_endpoints(openapi_spec, instructions):
                                     "sfdp_endpoint_path": sfdp_endpoint_path,
                                     "name": details["operationId"],
                                     "parameters": parameters,
-                                    "description": details.get("description", ""),
+                                    "description": sfdp_endpoint_description,
                                     "response_model": {
                                         "name": response_model_name,
                                         "properties": response_model_spec["properties"],
@@ -87,7 +88,7 @@ def parse_endpoints(openapi_spec, instructions):
                                     "sfdp_endpoint_path": sfdp_endpoint_path,
                                     "name": details["operationId"],
                                     "parameters": parameters,
-                                    "description": details.get("description", ""),
+                                    "description": sfdp_endpoint_description,
                                     "response_model": {
                                         "name": response_model_name,
                                         "properties": response_model_spec,

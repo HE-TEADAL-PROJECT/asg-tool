@@ -97,6 +97,7 @@ Each endpoint mapping under `sfdp_endpoints` is a dictionary with the following 
   - **`<endpoint_name>`**: The name of the endpoint (e.g., `stops_endpoint`).
   - **`fdp_path`**: (String) The path to the FDP endpoint. It is a string with placeholders for dynamic segments (e.g., `/stops/stop_id/{stop_id}`).
   - **`sfdp_path`**: (String) The path to the SFDP endpoint. It mirrors the FDP path with similar placeholders (e.g., `/stop_id/{stop_id}`).
+  - **`sfdp_endpoint_description`**: (String) The description of the SFDP endpoint.
   - **`schema`**: A dictionary defining the schema for the data associated with the endpoint. This section describes the data types and structures expected for the response or request payloads.
 
 ### Schema Structure
