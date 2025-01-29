@@ -2,6 +2,7 @@ sfdp_endpoints:
   - persons_endpoint:
       fdp_path: /persons
       sfdp_path: /persons_above_30
+      sfdp_description: ''''''''''''
       schema:
           Person:
               type: object
@@ -13,4 +14,19 @@ sfdp_endpoints:
                 person_age:
                       type: integer
                       example: 3
-                      description: "the age is bigger than 30"
+                      description: "the age is above 30"
+  - persons_endpoint_2:
+      fdp_path: /persons
+      sfdp_path: /persons_above_60
+      schema:
+          Person:
+              type: object
+              properties:
+                person_ID:
+                    type: integer
+                    example: 101
+                    description: "map person_id"
+                person_age:
+                      type: integer
+                      example: 3
+                      description: "the age is above 60"
