@@ -30,9 +30,9 @@ def _tool_call(
     load_user_functions(transform_folder_path)
     functions = [transform.model_dump() for transform in tool_metadata_list]
     return simple_tool_calling(
-    config_file,
-    functions,
-    query,
+    config_file=config_file,
+    functions=functions,
+    query=query,
     ) 
 
 
