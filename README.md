@@ -58,13 +58,15 @@ Requires access to the corporate IBM github to pull GIN library.
 4. **Run the application**:
 
 To generate the SFDP server application, you need to provide the following command line parameters:
-- The OpenAPI specification of the source FDP as `-spec` parameter
-- The URL of the source FDP as `-fdp_server` parameter
+- The OpenAPI specification of the source FDP as `-fdp_spec` parameter
+- The URL of the source FDP as `-fdp_url` parameter
 - The ASG instructions file describing the SFDP to be generated as `-i` parameter
 - The ASG congiguration file required for accessing and configuring the OpenAI service, as `-c` parameter
+- The ASG output files folder location, as `-o` parameter
+- The ASG transformation functions folder location, as `-t` parameter
 
    ```bash
-   python src/generate_sfdp.py -spec <PATH_TO_FDP_OPENAPI_SPEC> -i <SFDP_GENERATION_INSTRUCTION_FILE> -fdp_server <FDP_URL> -c <GIN_TEADAL_CONFIG_FILE>
+   python src/generate_sfdp.py -fdp_spec <PATH_TO_FDP_OPENAPI_SPEC> -i <SFDP_GENERATION_INSTRUCTION_FILE> -fdp_url <FDP_URL> -c <GIN_TEADAL_CONFIG_FILE>
    ```
 
 
@@ -112,6 +114,7 @@ Each endpoint mapping under `sfdp_endpoints` is a dictionary with the following 
   - **`<endpoint_name>`**: The name of the endpoint (e.g., `stops_endpoint`).
   - **`fdp_path`**: (String) The path to the FDP endpoint. It is a string with placeholders for dynamic segments (e.g., `/stops/stop_id/{stop_id}`).
   - **`sfdp_path`**: (String) The path to the SFDP endpoint. It mirrors the FDP path with similar placeholders (e.g., `/stop_id/{stop_id}`).
+  - **`sfdp_endpoint_description`**: (String) The description of the SFDP endpoint.
   - **`schema`**: A dictionary defining the schema for the data associated with the endpoint. This section describes the data types and structures expected for the response or request payloads.
 
 ### Schema Structure

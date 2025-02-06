@@ -22,17 +22,17 @@ sys.path.append("./transform")
 def _tool_call(
     config_file: str,
     query: str,
+    transform_folder_path: str,
 ) -> dict:
     """
     Make a call for GIN tool calling with the tools
     """
-    user_functions_dir = './transform'
-    load_user_functions(user_functions_dir)
+    load_user_functions(transform_folder_path)
     functions = [transform.model_dump() for transform in tool_metadata_list]
     return simple_tool_calling(
-    config_file,
-    functions,
-    query,
+    config_file=config_file,
+    functions=functions,
+    query=query,
     ) 
 
 
@@ -150,7 +150,7 @@ def create_spec_section(endpoint, base_url, apiKey, auth, path_params, query_par
     return con_spec
 
 
-def handle_transform_instructions(list_of_instructions, conf):
+def handle_transform_instructions(list_of_instructions, conf, transform_folder_path):
     results = []
     for endpoint_instructs in list_of_instructions["sfdp_endpoints"]:
         for endpoint, instructs in endpoint_instructs.items():
@@ -158,7 +158,7 @@ def handle_transform_instructions(list_of_instructions, conf):
                 for param_name, param_data in field_data["properties"].items():
                     res = {}
                     result = _tool_call(
-                        conf, param_data["description"] + f" to target: {param_name}"
+                        conf, param_data["description"] + f" to target: {param_name}" , transform_folder_path
                     )
                     res["endpoint"] = endpoint
                     res["context_metadata"] = [

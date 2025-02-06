@@ -20,7 +20,7 @@ models:
       random_seed: 10
       temperature: 0
   granite3.1-dense:
-    id: granite3.1-dense:8b
+    id: granite3.1-dense:2b
     host: OLLAMA
     parameters:
       max_tokens: 1024
@@ -33,6 +33,5 @@ generation:
   features:
     rag: false
     staticChecks: true
-    llmEval:
-       enabled: false
+    llmEval: false
 

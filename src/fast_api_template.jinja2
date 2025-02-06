@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 
 
@@ -35,8 +35,11 @@ async def {{ endpoint.sfdp_endpoint_name }}({% for param in endpoint.parameters 
 
     spec_string = f"""{full_spec}"""
 
-    
-    res = exec.run_from_spec_string(spec_string, user_functions_path="/app/transform")
+    try:
+        res = exec.run_from_spec_string(spec_string, user_functions_path="./transform")
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail="Executor failed to run the spec file")
     try:
         response_data = {key: (df.dropna()).to_dict(orient='records') for key, df in res.items()}
     except:

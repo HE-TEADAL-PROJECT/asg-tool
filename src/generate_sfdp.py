@@ -1,4 +1,5 @@
 import os
+import shutil
 import argparse
 import sys
 import yaml
@@ -16,7 +17,7 @@ from src.handle_transform import handle_transform_instructions
 
 
 def render_fastapi_template(
-    output_file, endpoints, endpoints_full_connectors_specs
+     endpoints, endpoints_full_connectors_specs
 ):
 
     env = Environment(
@@ -25,28 +26,22 @@ def render_fastapi_template(
     template = env.get_template("fast_api_template.jinja2")
     data = {
         "endpoints": endpoints,
-        #"teadal_server": fdp_server + name_suffix,
-        #"results": results,
-        #"apiKey": api_key,
         "endpoints_full_connectors_specs": endpoints_full_connectors_specs,
     }
 
     rendered_content = template.render(data)
 
-    with open(output_file, "w") as file:
-        file.write(rendered_content)
+    return rendered_content
 
-def generate_app_for_spec(spec_file_name, instructions_file, fdp_server, api_key, config_file_path):
+def generate_app_for_spec(spec_file_name, instructions_file, fdp_server, api_key, config_file_path, transform_folder_path):
     openapi_spec = load_openapi_spec(spec_file_name)
     with open(instructions_file, "r") as f:
         list_of_instructions = yaml.load(f, Loader=yaml.SafeLoader)
     endpoints = parse_endpoints(openapi_spec, list_of_instructions)
     pprint.pprint(endpoints)
-    # name_suffix = spec_file_name.split("yaml")[0].split("\\")[2].split(".")[0] # does not work on lnx
-    # name_suffix = spec_file_name.split("yaml")[0].split(os.sep)[-1].split(".")[0] # fixed 
-    name_suffix = Path(spec_file_name).stem
+    name_suffix = Path(spec_file_name).stem.replace("-", "_")
     print(f"name_suffix={name_suffix}") 
-    results = handle_transform_instructions(list_of_instructions, config_file_path)
+    results = handle_transform_instructions(list_of_instructions, config_file_path, transform_folder_path)
     path_params = {}
     query_params= {}
     endpoints_full_connectors_specs = {}
@@ -61,8 +56,7 @@ def generate_app_for_spec(spec_file_name, instructions_file, fdp_server, api_key
         full_spec = handle_transform.add_export_section(endpoint['sfdp_endpoint_name'], con_spec, results)
         endpoints_full_connectors_specs[endpoint['sfdp_endpoint_name']] = full_spec
 
-    render_fastapi_template(
-        f"generated_servers/generated_fastapi_app_{name_suffix}.py",
+    return render_fastapi_template(
         endpoints,
         endpoints_full_connectors_specs,
     )
@@ -75,7 +69,7 @@ if __name__ == "__main__":
 
     # Add -spec flag to accept a single spec file or directory
     parser.add_argument(
-        "-spec",
+        "-fdp_spec",
         type=str,
         required=True,
         help="The path to the OpenAPI spec file or directory.",
@@ -89,7 +83,7 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "-fdp_server", type=str, required=True, help="The FDP server URL"
+        "-fdp_url", type=str, required=True, help="The FDP server URL"
     )
 
     parser.add_argument(
@@ -100,29 +94,56 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
+        "-o", 
+        type=str, 
+        default="./generated_servers/", 
+        help="Output folder location"
+    )
+
+    parser.add_argument(
         "-c", 
         type=str, 
         default="./config/gin-teadal-config.yaml", 
         help="GIN configuration file."
     )
 
+    parser.add_argument(
+        "-t", 
+        type=str, 
+        default="./transform/", 
+        help="Transformations functions implementation folder"
+    )
+
     args = parser.parse_args()
 
-    spec_path = args.spec
+    spec_path = args.fdp_spec
     instructions_file = args.i
-    fdp_server = args.fdp_server
+    fdp_server = args.fdp_url
     api_key = args.k  # Optional key, defaults to 'DUMMY_KEY'
     config_file_path = args.c
-    # Check if the spec_path is a directory or a single file
-    if os.path.isdir(spec_path):
-        # If it's a directory, generate app for each spec in that directory
-        specs_list = os.listdir(spec_path)
-        for spec in specs_list:
-            generate_app_for_spec(
-                os.path.join(spec_path, spec), instructions_file, fdp_server, api_key, config_file_path
-            )
-    elif os.path.isfile(spec_path):
+    transform_folder_path = args.t
+    output_folder = args.o
+    if os.path.isfile(spec_path):
         # If it's a single file, generate app for that specific file
-        generate_app_for_spec(spec_path, instructions_file, fdp_server, api_key, config_file_path)
+        app_content = generate_app_for_spec(spec_path, instructions_file, fdp_server, api_key, config_file_path, transform_folder_path)
+        # Ensure the destination folder exists
+        os.makedirs(output_folder, exist_ok=True)
+
+        # Move files
+        app_content_output = os.path.join(output_folder, 'app.py')
+        with open(app_content_output, "w") as file:
+            file.write(app_content)
+
+        destination_path = os.path.join(output_folder, 'requirements.txt')
+        shutil.copy('generated_servers/requirements-sfdps.txt', destination_path)
+
+        os.makedirs(output_folder+'/transform/', exist_ok=True)
+        for file_name in os.listdir(transform_folder_path):
+            source_path = os.path.join(transform_folder_path, file_name)
+            destination_path = os.path.join(output_folder+'/transform/', file_name)
+            # Move only files, not directories
+            if os.path.isfile(source_path):
+                shutil.copy(source_path, destination_path)
+
     else:
-        print(f"Error: {spec_path} is neither a valid directory nor a file.")
+        print(f"Error: {spec_path} is not a valid file.")
