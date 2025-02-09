@@ -125,8 +125,12 @@ if __name__ == "__main__":
     output_folder = args.o
     if os.path.isfile(spec_path):
         # If it's a single file, generate app for that specific file
-        app_content = generate_app_for_spec(spec_path, instructions_file, fdp_server, api_key, config_file_path, transform_folder_path)
+        try:
+            app_content = generate_app_for_spec(spec_path, instructions_file, fdp_server, api_key, config_file_path, transform_folder_path)
         # Ensure the destination folder exists
+        except Exception as e:
+            print(f"Error: {e}, please make sure you have the needed configurations and access rights")
+            exit(1)
         os.makedirs(output_folder, exist_ok=True)
 
         # Move files
@@ -136,7 +140,7 @@ if __name__ == "__main__":
 
         destination_path = os.path.join(output_folder, 'requirements.txt')
         shutil.copy('generated_servers/requirements-sfdps.txt', destination_path)
-
+        shutil.copy('.reqs/teadal_executor-0.1.1-py3-none-any.whl', output_folder)
         os.makedirs(output_folder+'/transform/', exist_ok=True)
         for file_name in os.listdir(transform_folder_path):
             source_path = os.path.join(transform_folder_path, file_name)
