@@ -1,0 +1,25 @@
+aiPlatforms:
+  Watsonx:
+    platform: watsonx
+    credentials:
+      api_key: $WATSONX_APIKEY
+      api_base: https://us-south.ml.cloud.ibm.com
+      api_project_id: 02c995f9-d57b-444e-8833-0ab8e404f139
+models:
+  granite-code-inst20:
+    id: ibm/granite-20b-code-instruct
+    host: Watsonx
+    parameters:
+      decoding_method: greedy
+      max_new_tokens: 1024
+      random_seed: 10
+      temperature: 0
+generation:
+  models:
+    - granite-code-inst20
+  maxIter: 3
+  features:
+    rag: false
+    staticChecks: true
+    llmEval: false
+

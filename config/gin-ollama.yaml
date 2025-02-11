@@ -1,0 +1,23 @@
+aiPlatforms:
+  OLLAMA:
+    platform: openai
+    credentials:
+      api_key: ollama
+      api_base: http://localhost:11434/v1
+models:
+  granite3.1-dense:
+    id: granite3.1-dense:2b
+    host: OLLAMA
+    parameters:
+      max_tokens: 1024
+      seed: 10
+      temperature: 0
+generation:
+  models:
+    - granite3.1-dense
+  maxIter: 3
+  features:
+    rag: false
+    staticChecks: true
+    llmEval: false
+
