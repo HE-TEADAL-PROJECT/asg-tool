@@ -1,0 +1,74 @@
+# Configuring the ASG
+
+ASG depends on IBM Gin library that implements the agentic system for generating data connectors. IBM GIN Library employs Large Language Models (LLMs) to perform generative AI tasks. For the system to work, it must be enabled to access a supported LLM provider and a supported model that this provider can execute. 
+
+ASG configuration file is `yaml` file with the entries described below.
+
+## `aiPlatforms` entry
+This entry specifies the list of LLM Providers that can be used, selected by what's specified later in the file in the `generation` entry.
+Currently, IBM GIN library supports several LLM providers. For TEADAL project, the possibilities are:
+
+1. `ollama` requires `ollama` server to be accessible. The server can be installed either on the developer's workstation where the ASG is run or on a server accessible from the developer's workstation. In any case, the address of the `ollama` server has to be configured as shown in the [ASF-ollama configuration example](../config/gin-ollama.yaml)).
+
+2. `IBM WatsonX` provider is available through the IBM Cloud as a service. To use this provider, one must be registered with the IBM cloud and obtain the API key and the projectID as shown in the [ASG-watsonx configuration example](../config/gin-watsonx.yaml)). 
+
+## `models` entry
+This entry specifies the list of models that can be used, selected by what's specified later in the file in the `generation` entry.
+Developers of the IBM GIN Library work to validate and select the best models for each supported task. For the TEADAL SFDP generation, we advise using the selected and tested models that are listed in the example configuration files:
+
+1. `ollama` provider shall be used with the `granite3.1-dense` models family. 
+2. `IBM WatsonX` provider shall be used with the `granite-code-inst20` models family.
+
+## `generation` entry
+This entry specifies one specific model to be executed in the current run, referencing one of the models listed in the `models` entry of the configuration file. In addition, it is possible to specify:
+
+- The maximum number of retries allowed for the model to process a user query if static checks identify issues in the LLM's response as `maxIter`.
+- The features enabled as part of GIN execution as `features`. Possible settings are:
+    - **rag**: enables or disables the Retrieval-Augmented Generation feature.
+    - **staticChecks**: conducts static checks to identify syntactic issues based on the context and the LLM's response.
+    - **llmEval**: provides LLM evaluation of the response (currently not supported).
+
+## Example
+
+```yaml
+aiPlatforms:    # list of the available platforms
+  OLLAMA:       # ollama - only requires the server URL
+    platform: openai
+    credentials:
+      api_key: ollama
+      api_base: http://localhost:11434/v1
+  Watsonx:      # watsonx - required the URL (do not change), API key (use yours), and project id (use yours)
+    platform: watsonx
+    credentials:
+      api_key: <use yours>
+      api_base: https://us-south.ml.cloud.ibm.com
+      api_project_id: <use yours>
+
+models:     # list of the models supported by GIN and available on one of the providers listed above, along with their parameters
+  granite-code-inst20:
+    id: ibm/granite-20b-code-instruct
+    host: Watsonx
+    parameters:
+      decoding_method: greedy
+      max_new_tokens: 1024
+      random_seed: 10
+      temperature: 0
+  granite3.1-dense:
+    id: granite3.1-dense:2b
+    host: OLLAMA
+    parameters:
+      max_tokens: 1024
+      seed: 10
+      temperature: 0
+
+generation: # model and features selected for the current generation 
+  models:
+    - granite-code-inst20
+  maxIter: 3
+  features:
+    rag: false
+    staticChecks: true
+    llmEval: false
+```
+
+

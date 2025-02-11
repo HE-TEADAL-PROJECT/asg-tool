@@ -1,6 +1,6 @@
 # Installing the ASG
 
-## Clone the repository
+## Clone the repository from the TEADAL gitlab
 
 ```sh
 git clone https://gitlab.teadal.ubiwhere.com/teadal-tech/asg_generation_code.git <folder_name>
@@ -14,20 +14,30 @@ cd <folder_name>
 $ which python
 $ python --version
 ```
-- create and activate virtual environment
+- create virtual environment
 ```sh
 $ python -m venv .venv
-$ . .venv/Scripts/activate  # on Windows
-$ . .venv/bin/activate      # On Linux
 ```
 
-- validate the activation 
+## Activate virtual environment 
+- on Linux:
 ```sh
-$ which python  # should point to python binary inside the virtual environment
-$ which pip     # should point to pip binary inside the virtual environment
+. .venv/bin/activate 
 ```
 
-- upgrade pip
+- on Windows:
+```sh
+. .venv/Scripts/activate 
+```
+
+## Validate the activation - ensure both `python` and `pip` executables point to binaries inside the virtual environment
+```sh
+$ which python  
+$ which pip    
+```
+
+## Upgrade pip
+(optional, just to avoid sticky reminders)
 ```sh
 $ python -m pip install --upgrade pip
 ```
@@ -58,7 +68,9 @@ Building wheels for collected packages: chroma-hnswlib
   ERROR: Failed building wheel for chroma-hnswlib
 Failed to build chroma-hnswlib
 ERROR: Failed to build installable wheels for some pyproject.toml based projects (chroma-hnswlib)
-```
+``` 
 
+## Proceed generating the SFDP 
 
-export 
+- Configure the ASG and its GIN backend following the instructions [here](./configuring-asg.md) 
+- Follow [these instructions](./generating-sfdp.md) to generate the SFDP.

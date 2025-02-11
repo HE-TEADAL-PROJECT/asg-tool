@@ -1,6 +1,21 @@
 # TEADAL-GIN-ASG
-  Create Shared Federated data product automatically using IBM's GIN solution.
-## project structure
+
+Create TEADAL Shared Federated Data Products (SFDPs) automatically using IBM's GIN solution. 
+
+## Instructions Summary (TLDR :-)
+
+SFDP generation with ASG can be performed locally on developer's workstation. For this, start with [ASG installation instructions](./docs/installing-asg.md) and proceed to the next steps: [Configuring the ASG](./docs/configuring-asg.md), [Specifying the SFDP to be created](./docs/specifying-sfdp.md), [Generationg the SFDP](./docs/generating-sfdp.md), and, finally, [Validating the newly created SFDP](./docs/validating-sfdp.md).
+
+When the new SFDP is validated and found acceptable for the deployment, proceed to creating TEADAL deployement artifacts as described [here (TBD)](./docs/deploying-sfdp.md).
+
+To contribute to the ASG project, follow instructions [here (TBD)](./docs/deploying-sfdp.md)
+
+## More Details
+
+(some of the information below might be outdated; please follow links in the summary above)
+
+### ASG project structure
+
 ```plaintext
 teadal-connectors/
 ├── src/                           # Source code files
@@ -33,81 +48,15 @@ teadal-connectors/
 └── requirements.txt               # List of dependencies
 ```
 
-
-## How to Run
-
-1. **Clone the repository**:
-   ```bash
-   git clone git@github.ibm.com:mc-connectors/teadal-connectors.git
-   cd teadal-connectors
-   ```
-
-2. **Set up the virtual environment**:
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
-   ```
-
-3. **Install the dependencies**:
-
-Requires access to the corporate IBM github to pull GIN library.
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Run the application**:
-
-To generate the SFDP server application, you need to provide the following command line parameters:
-- The OpenAPI specification of the source FDP as `-fdp_spec` parameter
-- The URL of the source FDP as `-fdp_url` parameter
-- The ASG instructions file describing the SFDP to be generated as `-i` parameter
-- The ASG congiguration file required for accessing and configuring the OpenAI service, as `-c` parameter
-- The ASG output files folder location, as `-o` parameter
-- The ASG transformation functions folder location, as `-t` parameter
-
-   ```bash
-   python src/generate_sfdp.py -fdp_spec <PATH_TO_FDP_OPENAPI_SPEC> -i <SFDP_GENERATION_INSTRUCTION_FILE> -fdp_url <FDP_URL> -c <GIN_TEADAL_CONFIG_FILE>
-   ```
-
-
-## Running the generated SFDP server
-
- - Run the server using the command - 
-  ```bash
-  uvicorn generated_servers.{{generated_fastapi_app_name}}:app --reload # where {{generated_fastapi_app}} is one of the generated FastAPI apps.
-  ```
- - The server will run on localhost port 8000.
- - From the browser or any rest client, send a request to the running server on localhost:
-     for example: stops: http://localhost:8000/stops/
-     the response will be returned as json.
-   
-## Configuration File Structure
-
-### aiPlatforms
-Defines the configuration for the platforms where AI models will run, including the required credentials. Supported platforms include Ollama and IBM Watsonx (the latter requires special access).
-
-### models
-Specifies the configuration of AI models, detailing the platform (`aiPlatform`) on which the model is running and various model parameters, such as `max_new_tokens` and `temperature`.
-
-### generation
-Outlines the GIN operation modes, including the model ID (referenced from the `models` section) to be used, and the maximum number of retries allowed for the model to process a user query if static checks identify issues in the LLM's response.
-
-### features
-- **rag**: Enables or disables the Retrieval-Augmented Generation feature.
-- **staticChecks**: Conducts static checks to identify syntactic issues based on the context and the LLM's response.
-- **llmEval**: Provides LLM evaluation of the response (currently not supported).
-
-
-
-## ASG Specification file structure 
+### ASG Specification file structure 
 
 This section describes the structure of the YAML file used for defining the mappings between SFDP and FDP endpoints, including schema definitions for the associated data.
 
-### Top-Level Structure
+#### Top-Level Structure
 
 - **`sfdp_endpoints`**: A list of endpoint mappings. Each item in this list represents a specific endpoint and its associated configurations.
 
-### Endpoint Mapping Structure
+#### Endpoint Mapping Structure
 
 Each endpoint mapping under `sfdp_endpoints` is a dictionary with the following keys:
 
@@ -117,7 +66,7 @@ Each endpoint mapping under `sfdp_endpoints` is a dictionary with the following 
   - **`sfdp_endpoint_description`**: (String) The description of the SFDP endpoint.
   - **`schema`**: A dictionary defining the schema for the data associated with the endpoint. This section describes the data types and structures expected for the response or request payloads.
 
-### Schema Structure
+#### Schema Structure
 
 The `schema` key contains one or more schema definitions. Each schema is a dictionary with the following keys:
 
@@ -125,7 +74,7 @@ The `schema` key contains one or more schema definitions. Each schema is a dicti
   - **`type`**: (String) The type of the schema. It is usually `object` to indicate a structured object.
   - **`properties`**: A dictionary that defines the properties of the schema object. Each property has its own definition.
 
-#### Property Definition
+##### Property Definition
 
 Each property in the `properties` dictionary has the following keys:
 
@@ -134,7 +83,7 @@ Each property in the `properties` dictionary has the following keys:
   - **`example`**: (Optional) An example value for the property. It illustrates a sample data value that conforms to the property's type.
   - **`description`**: (String) A brief description of the property. It explains what the property represents and how is it constructred from the FDP endpoint's (fdp_path) ouput data model.
 
-## Example Structure
+#### Example Structure
 
 ```yaml
 sfdp_endpoints:
@@ -151,7 +100,7 @@ sfdp_endpoints:
               description: <property_description>
 ```
 
-## Creating an image to run the SFDP server in a conatiner
+### Creating an image to run the SFDP server in a conatiner
 After creating the SFDP server, Dockerfile has the needed commands and copies the needed files to be able to run the server in a container (e.g copying the server, copying the user defined functions, installing the requirements to run the executor).
 
 From root folder, run the following:
