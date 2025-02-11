@@ -7,7 +7,7 @@
 - Prepare the required inputs:
 
     - For the source FDP, you need the FDP `url` and its openapi specification file.
-    - For the new SFDP, you need the ASG instructions file and the data transformation code prepared as described [here](./specifying-sfdp).
+    - For the new SFDP, you need the ASG instructions file and the data transformation code prepared as described [here](./specifying-sfdp.md).
 
 - Select the LLM provider and its model and modify the configuration file accordingly to use the selected provider/model. Currently, ASG supports locall `ollama` provider with the `granite3.1-dense` model (see [example configuration file](../config/gin-ollama.yaml)) and the `IBM WatsonX` provider with the `granite-code-inst20` model (see [example configuration file](../config/gin-watsonx.yaml)). More details about configuring ASG and its GIN backend are [here](./configuring-asg.md).
 
