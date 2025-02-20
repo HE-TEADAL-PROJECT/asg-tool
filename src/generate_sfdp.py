@@ -33,6 +33,7 @@ def render_fastapi_template(
 
     return rendered_content
 
+
 def generate_app_for_spec(spec_file_name, instructions_file, fdp_server, api_key, config_file_path, transform_folder_path):
     openapi_spec = load_openapi_spec(spec_file_name)
     with open(instructions_file, "r") as f:
@@ -61,6 +62,17 @@ def generate_app_for_spec(spec_file_name, instructions_file, fdp_server, api_key
         endpoints_full_connectors_specs,
     )
 
+
+def get_next_filename(output_folder, base_name="app", extension=".py"):
+    """Find the next available filename by incrementing the number."""
+    index = 0
+    while True:
+        filename = f"{base_name}{index if index > 0 else ''}{extension}"
+        file_path = os.path.join(output_folder, filename)
+        if not os.path.exists(file_path):  # Check if file exists
+            return file_path
+        index += 1
+    
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -134,7 +146,7 @@ if __name__ == "__main__":
         os.makedirs(output_folder, exist_ok=True)
 
         # Move files
-        app_content_output = os.path.join(output_folder, 'app.py')
+        app_content_output = get_next_filename(output_folder)
         with open(app_content_output, "w") as file:
             file.write(app_content)
 
