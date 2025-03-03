@@ -33,6 +33,7 @@ def render_fastapi_template(
 
     return rendered_content
 
+
 def generate_app_for_spec(spec_file_name, instructions_file, fdp_server, api_key, config_file_path, transform_folder_path):
     openapi_spec = load_openapi_spec(spec_file_name)
     with open(instructions_file, "r") as f:
@@ -61,6 +62,17 @@ def generate_app_for_spec(spec_file_name, instructions_file, fdp_server, api_key
         endpoints_full_connectors_specs,
     )
 
+
+def get_next_filename(output_folder, base_name="app", extension=".py"):
+    """Find the next available filename by incrementing the number."""
+    index = 0
+    while True:
+        filename = f"{base_name}{index if index > 0 else ''}{extension}"
+        file_path = os.path.join(output_folder, filename)
+        if not os.path.exists(file_path):  # Check if file exists
+            return file_path
+        index += 1
+    
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -125,18 +137,22 @@ if __name__ == "__main__":
     output_folder = args.o
     if os.path.isfile(spec_path):
         # If it's a single file, generate app for that specific file
-        app_content = generate_app_for_spec(spec_path, instructions_file, fdp_server, api_key, config_file_path, transform_folder_path)
+        try:
+            app_content = generate_app_for_spec(spec_path, instructions_file, fdp_server, api_key, config_file_path, transform_folder_path)
         # Ensure the destination folder exists
+        except Exception as e:
+            print(f"Error: {e}, please make sure you have the needed configurations and access rights")
+            exit(1)
         os.makedirs(output_folder, exist_ok=True)
 
         # Move files
-        app_content_output = os.path.join(output_folder, 'app.py')
+        app_content_output = get_next_filename(output_folder)
         with open(app_content_output, "w") as file:
             file.write(app_content)
 
         destination_path = os.path.join(output_folder, 'requirements.txt')
         shutil.copy('generated_servers/requirements-sfdps.txt', destination_path)
-
+        shutil.copy('.reqs/teadal_executor-0.1.1-py3-none-any.whl', output_folder)
         os.makedirs(output_folder+'/transform/', exist_ok=True)
         for file_name in os.listdir(transform_folder_path):
             source_path = os.path.join(transform_folder_path, file_name)
