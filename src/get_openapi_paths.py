@@ -1,5 +1,8 @@
 import yaml
 from gin.gen.util import ref_resolver
+import logging
+from gin.common.logging import Logging
+logger = logging.getLogger(Logging.BASE)
 
 """
 Helper functions
@@ -16,7 +19,11 @@ Get needed endpoints data from spec to create an operational fast api applicatio
 """
 
 
-def parse_endpoints(openapi_spec, instructions):
+def parse_endpoints(
+        openapi_spec: str, 
+        instructions: str) -> list[dict]:
+    
+    logger.debug(f"parse_endpoints enter")
     paths = openapi_spec.get("paths", {})
     endpoints = []
     for path, methods in paths.items():

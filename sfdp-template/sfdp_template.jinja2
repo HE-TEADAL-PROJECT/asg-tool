@@ -1,10 +1,28 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 import traceback
+from pydantic_settings import BaseSettings
 
 from gin.executor import exec
 
+class Settings(BaseSettings):
+    debug: bool = False
+
+settings = Settings()
+
 app = FastAPI()
+
+def log_level_string():
+    if settings.debug:
+        return "DEBUG"
+    else:
+        return None
+
+@app.get("/info")
+async def info():
+    return {
+        "debug": settings.debug,
+    }
 
 # Define FastAPI endpoints
 {% for endpoint in endpoints %}
@@ -36,7 +54,10 @@ async def {{ endpoint.sfdp_endpoint_name }}({% for param in endpoint.parameters 
     spec_string = f"""{full_spec}"""
 
     try:
-        res = exec.run_from_spec_string(spec_string, user_functions_path="./transform")
+        res = exec.run_from_spec_string(
+            spec_string, 
+            log_level=log_level_string(),
+            user_functions_path="./transform")
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail="The specified file or directory was not found.")
     except PermissionError as e:
@@ -47,6 +68,7 @@ async def {{ endpoint.sfdp_endpoint_name }}({% for param in endpoint.parameters 
         error_message = f"Executor failed to run the spec file: {str(e)}"
         traceback.print_exc()  # Logs the full traceback for debugging
         raise HTTPException(status_code=500, detail=error_message)
+    
     try:
         response_data = {key: (df.dropna()).to_dict(orient='records') for key, df in res.items()}
     except:

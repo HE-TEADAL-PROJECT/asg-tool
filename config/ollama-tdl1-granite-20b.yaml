@@ -1,0 +1,23 @@
+aiPlatforms:
+  OLLAMA:
+    platform: openai
+    credentials:
+      api_key: ollama
+      api_base: http://9.148.244.237/ollama/v1
+models:
+  granite-code:
+    id: granite-code:20b
+    host: OLLAMA
+    parameters:
+      max_tokens: 1024
+      seed: 10
+      temperature: 0
+generation:
+  models:
+    - granite-code
+  maxIter: 3
+  features:
+    rag: false
+    staticChecks: true
+    llmEval: false
+

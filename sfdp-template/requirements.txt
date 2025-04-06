@@ -1,0 +1,7 @@
+fastapi[standard]
+pydantic_settings
+pandas
+varsubst
+PyYAML
+langchain_core
+teadal_executor-0.1.1-py3-none-any.whl

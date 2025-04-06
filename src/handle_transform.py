@@ -1,9 +1,8 @@
 import json
-import os
 from gin.common.types import ToolDetails
-from gin.gen.agents.tool_calling import apply_tool_calling
-import gin.gen.config
-import gin.gen.config
+import logging
+from gin.common.logging import Logging
+logger = logging.getLogger(Logging.BASE)
 
 
 from gin.common.con_spec import (
@@ -150,15 +149,20 @@ def create_spec_section(endpoint, base_url, apiKey, auth, path_params, query_par
     return con_spec
 
 
-def handle_transform_instructions(list_of_instructions, conf, transform_folder_path):
+def handle_transform_instructions(
+        instructions: str, 
+        gin_config_path: str, 
+        transform_folder_path: str) -> list[dict]:
     results = []
-    for endpoint_instructs in list_of_instructions["sfdp_endpoints"]:
+    for endpoint_instructs in instructions["sfdp_endpoints"]:
         for endpoint, instructs in endpoint_instructs.items():
             for field_name, field_data in instructs["schema"].items():
                 for param_name, param_data in field_data["properties"].items():
                     res = {}
                     result = _tool_call(
-                        conf, param_data["description"] + f" to target: {param_name}" , transform_folder_path
+                        gin_config_path, 
+                        param_data["description"] + f" to target: {param_name}" , 
+                        transform_folder_path
                     )
                     res["endpoint"] = endpoint
                     res["context_metadata"] = [
