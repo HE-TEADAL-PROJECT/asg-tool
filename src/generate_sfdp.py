@@ -15,6 +15,7 @@ import handle_transform
 def generate_sfdp(
         fdp_spec_path: str, 
         fdp_url: str, 
+        fdp_timeout: int,
         fdp_key: str, 
         instructions_path: str, 
         gin_config_path: str, 
@@ -26,7 +27,10 @@ def generate_sfdp(
     endpoints = get_openapi_paths.parse_endpoints(fdp_spec, instructions)
     logger.debug(f"Parsed {len(endpoints)} endpoints")
 
-    results = handle_transform.handle_transform_instructions(instructions, gin_config_path, transforms_path)
+    results = handle_transform.handle_transform_instructions(
+        instructions, 
+        gin_config_path, 
+        transforms_path)
     logger.debug(f"After transform, there are {len(results)} results")
 
     path_params = {}
@@ -39,8 +43,18 @@ def generate_sfdp(
             if param['in'] == 'query':
                 query_params[param['name']]  = param
 
-        con_spec = handle_transform.create_spec_section(endpoint ,fdp_url, fdp_key, "apiToken", path_params, query_params)
-        full_spec = handle_transform.add_export_section(endpoint['sfdp_endpoint_name'], con_spec, results)
+        con_spec = handle_transform.create_spec_section(
+            endpoint ,
+            fdp_url, 
+            fdp_key, 
+            "apiToken", 
+            path_params, 
+            query_params,
+            fdp_timeout)
+        full_spec = handle_transform.add_export_section(
+            endpoint['sfdp_endpoint_name'], 
+            con_spec, 
+            results)
         endpoints_full_connectors_specs[endpoint['sfdp_endpoint_name']] = full_spec
 
     return endpoints, endpoints_full_connectors_specs
@@ -74,6 +88,13 @@ def _get_args_parser() -> argparse.ArgumentParser:
         "-fdp_url", 
         type=str, 
         required=True, 
+        help="The FDP server URL"
+    )
+
+    parser.add_argument(
+        "-fdp_timeout", 
+        type=int, 
+        default=300, 
         help="The FDP server URL"
     )
 
@@ -166,6 +187,7 @@ if __name__ == "__main__":
     gin_config_path = _args_check_file(filename = args.c, argname = "gin_config_path")
     transforms_path = _args_check_folder(foldername = args.t, argname = "transforms_path")
     fdp_url = args.fdp_url
+    fdp_timeout = args.fdp_timeout
     fdp_key = args.k  
     output_path = args.o
 
@@ -173,6 +195,7 @@ if __name__ == "__main__":
         endpoints, specs = generate_sfdp(
             fdp_spec_path = fdp_spec_path, 
             fdp_url = fdp_url, 
+            fdp_timeout = fdp_timeout,
             fdp_key = fdp_key, 
             instructions_path = instructions_path, 
             gin_config_path = gin_config_path, 
@@ -196,6 +219,7 @@ if __name__ == "__main__":
     if index == 0 :
         logger.debug(f"Copying dependencies to the SFDP project")
         shutil.copy(f"{SFDP_TEMPLATE_DIR}{os.sep}requirements.txt", output_path)
+        shutil.copy(f"{SFDP_TEMPLATE_DIR}{os.sep}.gitignore", output_path)
         shutil.copy(f'{SFDP_TEMPLATE_DIR}{os.sep}teadal_executor-0.1.1-py3-none-any.whl', output_path)
         os.makedirs(sfdp_transform_path, exist_ok=True)
 

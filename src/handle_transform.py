@@ -35,7 +35,9 @@ def _tool_call(
     ) 
 
 
-def _get_doc_for_call(call_name: str, context_metadata: dict):
+def _get_doc_for_call(
+        call_name: str, 
+        context_metadata: dict):
     for doc in context_metadata:
         tool_details_dict = json.loads(doc["tool_details_str"])
         tool_details = ToolDetails(**tool_details_dict)
@@ -44,7 +46,10 @@ def _get_doc_for_call(call_name: str, context_metadata: dict):
             return tool_details
 
 
-def add_export_section(endpoint_name, con_spec, results):
+def add_export_section(
+        endpoint_name, 
+        con_spec, 
+        results):
     """Adds the export section to con_spec from the results calculated from the instuctions"""
     endpoint_transforms = [res for res in results if res["endpoint"] == endpoint_name]
     if endpoint_transforms == []:
@@ -68,7 +73,7 @@ def add_export_section(endpoint_name, con_spec, results):
                 if param == 'required':
                     continue
                 if param in call.parameters or (
-                     param_detail.required
+                    "required" in param_detail
                 ):
                     args = {}
                     args["name"] = param
@@ -93,7 +98,14 @@ def add_export_section(endpoint_name, con_spec, results):
     return json.dumps(con_spec, indent=3)
 
 
-def create_spec_section(endpoint, base_url, apiKey, auth, path_params, query_params):
+def create_spec_section(
+        endpoint, 
+        base_url, 
+        apiKey, 
+        auth, 
+        path_params, 
+        query_params, 
+        timeout):
     """Creates the connector spec for calling the fdp API"""
     apicall = {
         "type": CallTypeEnum.URL,
@@ -127,6 +139,7 @@ def create_spec_section(endpoint, base_url, apiKey, auth, path_params, query_par
             "inputPrompt": "DUMMY PROMPT - SPEC IS CREATED STATICALLY",
         },
         "spec": {
+            "timeout" : timeout,
             "apiCalls": apicalls_dict,
             "output": {
                 "execution": "",
