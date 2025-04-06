@@ -1,0 +1,22 @@
+aiPlatforms:
+  OLLAMA:
+    platform: openai
+    credentials:
+      api_key: ollama
+      api_base: http://${TEADAL_NODE_IP}/ollama/v1 # replace here or set the variable
+models:
+  granite-code:
+    id: granite-code:20b
+    host: OLLAMA
+    parameters:
+      max_tokens: 1024
+      seed: 10
+      temperature: 0
+generation:
+  models:
+    - granite-code
+  maxIter: 3
+  features:
+    rag: false
+    staticChecks: true
+    llmEval: false

@@ -1,16 +1,14 @@
 # Configuring the ASG
 
-ASG depends on IBM Gin library that implements the agentic system for generating data connectors. IBM GIN Library employs Large Language Models (LLMs) to perform generative AI tasks. For the system to work, it must be enabled to access a supported LLM provider and a supported model that this provider can execute. 
-
-ASG configuration file is `yaml` file with the entries described below.
+ASG depends on IBM Gin library that implements the agentic system for generating data connectors. IBM GIN Library employs Large Language Models (LLMs) to perform generative AI tasks. For the system to work, it must be enabled to access a supported LLM provider and a supported model that this provider can execute. Thus, ASG requires a configutation file it provides to the GIN library at runtime. This configuration file is a `yaml` file with the entries described below. ASG tool accepts the path to the configuration file as a parameter, default path is `./config/gin-teadal-config.yaml` (not included in the repo in order to avoid sharing secrets).
 
 ## `aiPlatforms` entry
 This entry specifies the list of LLM Providers that can be used, selected by what's specified later in the file in the `generation` entry.
 Currently, IBM GIN library supports several LLM providers. For TEADAL project, the possibilities are:
 
-1. `ollama` requires `ollama` server to be accessible. The server can be installed either on the developer's workstation where the ASG is run or on a server accessible from the developer's workstation. In any case, the address of the `ollama` server has to be configured as shown in the [ASF-ollama configuration example](../config/gin-ollama.yaml)).
+1. `ollama` requires `ollama` server to be accessible. The server can be installed either on the developer's workstation where the ASG is run or on a server accessible from the developer's workstation. In any case, the address of the `ollama` server has to be configured. For reference, see examples for the [ollama service running locally](../examples/config/gin-ollama-local.yaml) and for the [ollama service running on TEADAL Node](../examples/config/gin-ollama-tdl-node.yaml).
 
-2. `IBM WatsonX` provider is available through the IBM Cloud as a service. To use this provider, one must be registered with the IBM cloud and obtain the API key and the projectID as shown in the [ASG-watsonx configuration example](../config/gin-watsonx.yaml)). 
+2. `IBM WatsonX` provider is available through the IBM Cloud as a service. To use this provider, one must be registered with the IBM cloud and obtain the API key and the projectID as shown in the [ASG-watsonx configuration example](../examples/config/gin-watsonx.yaml). 
 
 ## `models` entry
 This entry specifies the list of models that can be used, selected by what's specified later in the file in the `generation` entry.
@@ -31,20 +29,27 @@ This entry specifies one specific model to be executed in the current run, refer
 ## Example
 
 ```yaml
-aiPlatforms:    # list of the available platforms
-  OLLAMA:       # ollama - only requires the server URL
+# list of the available platforms
+aiPlatforms:    
+  # ollama - only requires the server URL
+  OLLAMA:       
     platform: openai
     credentials:
       api_key: ollama
-      api_base: http://localhost:11434/v1
-  Watsonx:      # watsonx - required the URL (do not change), API key (use yours), and project id (use yours)
+      # change this url to suite your ollama service!
+      api_base: http://localhost:11434/v1 
+  # watsonx - required the URL (do not change), API key (use yours), and project id (use yours)
+  Watsonx:      
     platform: watsonx
     credentials:
       api_key: <use yours>
       api_base: https://us-south.ml.cloud.ibm.com
       api_project_id: <use yours>
 
-models:     # list of the models supported by GIN and available on one of the providers listed above, along with their parameters
+# list of the models supported by GIN and 
+# available on one of the providers listed above
+# along with their parameters
+models:     
   granite-code-inst20:
     id: ibm/granite-20b-code-instruct
     host: Watsonx
@@ -61,7 +66,9 @@ models:     # list of the models supported by GIN and available on one of the pr
       seed: 10
       temperature: 0
 
-generation: # model and features selected for the current generation 
+# model and features currently selected from the list above 
+# to be used for SFDP generation
+generation:  
   models:
     - granite-code-inst20
   maxIter: 3

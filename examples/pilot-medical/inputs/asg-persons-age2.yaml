@@ -1,0 +1,39 @@
+sfdp_endpoints:   
+  - persons_above_30:
+      fdp_path: /persons
+      sfdp_path: /persons_above_30
+      sfdp_endpoint_description: This endpoint returns all the people of age > 30
+      schema:
+          Person:
+              type: object
+              properties:
+                person_ID:
+                    type: integer
+                    example: 101
+                    description: "map person_id"
+                person_age:
+                      type: integer
+                      example: 3
+                      description: "the age is above 30"
+                care_site_id:
+                    type: integer
+                    description: "map care_site_id"
+  - persons_above_60:
+      fdp_path: /persons
+      sfdp_path: /persons_above_60
+      sfdp_endpoint_description: This endpoint returns all the people of age > 60
+      schema:
+          Person:
+              type: object
+              properties:
+                person_ID:
+                    type: integer
+                    example: 101
+                    description: "map person_id"
+                person_age:
+                      type: integer
+                      example: 3
+                      description: "the age is above 60"
+                care_site_id:
+                    type: integer
+                    description: "map care_site_id"

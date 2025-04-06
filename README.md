@@ -4,15 +4,24 @@ Create TEADAL Shared Federated Data Products (SFDPs) automatically using IBM's G
 
 ## Instructions Summary (TLDR :-)
 
-SFDP generation with ASG can be performed locally on developer's workstation. For this, start with [ASG installation instructions](./docs/installing-asg.md) and proceed to the next steps: [Configuring the ASG](./docs/configuring-asg.md), [Specifying the SFDP to be created](./docs/specifying-sfdp.md), [Generationg the SFDP](./docs/generating-sfdp.md), and, finally, [Validating the newly created SFDP](./docs/validating-sfdp.md).
+SFDP generation with ASG can be performed locally on developer's workstation. For this, start with [ASG installation instructions](./docs/01-installing-asg.md) and proceed to the next steps: [Configuring the ASG](./docs/02-configuring-asg.md), [Specifying the SFDP to be created](./docs/03-specifying-sfdp.md), [Generating the SFDP](./docs/04-generating-sfdp.md), and, finally, [Validating the newly created SFDP](./docs/05-validating-sfdp.md).
 
-When the new SFDP is validated and found acceptable for the deployment, proceed to creating TEADAL deployement artifacts as described [here (TBD)](./docs/deploying-sfdp.md).
+When the new SFDP is validated and found acceptable for the deployment, proceed to creating TEADAL deployement artifacts and deployment as described [here (TBD)](./docs/06-deploying-sfdp.md).
 
-To contribute to the ASG project, follow instructions [here (TBD)](./docs/deploying-sfdp.md)
+In addition, ASG service is available on the TEADAL Node. Consult TEADAL Node documentation for enabling and operating the service there (link TBD).
 
-## More Details
+To contribute to the ASG project, follow instructions [here (TBD)](./docs/00-developing-asg.md)
 
-(some of the information below might be outdated; please follow links in the summary above)
+## Examples
+
+The project contains several simple examples:
+
+1. Medical pilot [example](./examples/pilot-medical/README.md)
+
+### More Details
+
+> !!! some of the information below might be outdated <br>
+> !!! please follow links in the summary above <br>
 
 ### ASG project structure
 

@@ -1,5 +1,8 @@
 # Installing the ASG
 
+These instructions assume you plan to use the ASG locally.
+For instructions on how to enable and operate the service on TEADAL Node, see documentation there (link TBD).
+
 ## Clone the repository from the TEADAL gitlab
 
 ```sh
@@ -72,5 +75,5 @@ ERROR: Failed to build installable wheels for some pyproject.toml based projects
 
 ## Proceed generating the SFDP 
 
-- Configure the ASG and its GIN backend following the instructions [here](./configuring-asg.md) 
-- Follow [these instructions](./generating-sfdp.md) to generate the SFDP.
+- Configure the ASG and its GIN backend following the instructions [here](./02-configuring-asg.md) 
+- Follow [these instructions](./04-generating-sfdp.md) to generate the SFDP.
