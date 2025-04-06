@@ -17,6 +17,7 @@ To contribute to the ASG project, follow instructions [here (TBD)](./docs/00-dev
 The project contains several simple examples:
 
 1. Medical pilot [example](./examples/pilot-medical/README.md)
+1. Industry pilot [example](./examples/pilot-industry/README.md)
 
 ### More Details
 

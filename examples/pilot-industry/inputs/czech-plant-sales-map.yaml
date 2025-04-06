@@ -1,0 +1,26 @@
+sfdp_endpoints:
+    - sales_endpoint:
+        fdp_path: /sales
+        sfdp_path: /sales
+        schema:
+            Sales:
+                type: object
+                properties:
+                    client_name:
+                      type: string
+                      example: "Valencia Módulos de Puerta S.L."
+                      description: "map NomeCliente field"
+                    category: 
+                      type: string
+                      example: "PA"
+                      description: "map Categoria field"
+                    total_value:
+                      type: number
+                      format: double
+                      example: 3855.01
+                      description: "map ValorTOT field"
+                    currency:
+                      type: string
+                      example: "EUR"
+                      description: "map Moeda field"
+                     
