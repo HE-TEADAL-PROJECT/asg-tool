@@ -217,10 +217,21 @@ if __name__ == "__main__":
 
     sfdp_transform_path = f"{output_path}{os.sep}transform{os.sep}"
     if index == 0 :
-        logger.debug(f"Copying dependencies to the SFDP project")
+        logger.debug(f"Copying template elements to the SFDP project")
+        shutil.copy(f"{SFDP_TEMPLATE_DIR}{os.sep}README.md", output_path)
+        shutil.copy(f"{SFDP_TEMPLATE_DIR}{os.sep}.env", output_path)
+
         shutil.copy(f"{SFDP_TEMPLATE_DIR}{os.sep}requirements.txt", output_path)
+        shutil.copy(f"{SFDP_TEMPLATE_DIR}{os.sep}requirements-dev.txt", output_path)
+
+        shutil.copy(f"{SFDP_TEMPLATE_DIR}{os.sep}Dockerfile_from_src", output_path)
+        shutil.copy(f"{SFDP_TEMPLATE_DIR}{os.sep}Dockerfile_from_img", output_path)
+
         shutil.copy(f"{SFDP_TEMPLATE_DIR}{os.sep}.gitignore", output_path)
-        shutil.copy(f'{SFDP_TEMPLATE_DIR}{os.sep}teadal_executor-0.1.1-py3-none-any.whl', output_path)
+        shutil.copy(f"{SFDP_TEMPLATE_DIR}{os.sep}.gitattributes", output_path)
+        shutil.copy(f"{SFDP_TEMPLATE_DIR}{os.sep}.gitlab-ci.yml", output_path)
+        
+        # shutil.copy(f'{SFDP_TEMPLATE_DIR}{os.sep}teadal_executor-0.1.1-py3-none-any.whl', output_path)
         os.makedirs(sfdp_transform_path, exist_ok=True)
 
     logger.debug(f"Copying .py files from {transforms_path} to  {sfdp_transform_path}")

@@ -55,4 +55,5 @@ Each data element returned by the generated SFDP enpoint is specified as an entr
 
 ## Examples
 
+Example instruction files can be found in [examples directory](../examples/asg-instructions/)
 

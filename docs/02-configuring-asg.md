@@ -1,12 +1,15 @@
-# Configuring the ASG
+# Configuring the ASG-Tool
 
-ASG depends on IBM Gin library that implements the agentic system for generating data connectors. IBM GIN Library employs Large Language Models (LLMs) to perform generative AI tasks. For the system to work, it must be enabled to access a supported LLM provider and a supported model that this provider can execute. Thus, ASG requires a configutation file it provides to the GIN library at runtime. This configuration file is a `yaml` file with the entries described below. ASG tool accepts the path to the configuration file as a parameter, default path is `./config/gin-teadal-config.yaml` (not included in the repo in order to avoid sharing secrets).
+ASG-Tool depends on IBM Gin library that implements the agentic system for generating data connectors. IBM GIN Library employs Large Language Models (LLMs) to perform generative AI tasks. For the system to work, it must have access to a supported LLM provider and a supported model that this provider can execute. Thus, ASG-Tool requires a configutation file to be passed to the GIN library at runtime. This configuration file is a `yaml` file with the entries described below. ASG tool accepts the path to the configuration file as a parameter, default path is `./config/gin-teadal-config.yaml`.
 
 ## `aiPlatforms` entry
 This entry specifies the list of LLM Providers that can be used, selected by what's specified later in the file in the `generation` entry.
 Currently, IBM GIN library supports several LLM providers. For TEADAL project, the possibilities are:
 
-1. `ollama` requires `ollama` server to be accessible. The server can be installed either on the developer's workstation where the ASG is run or on a server accessible from the developer's workstation. In any case, the address of the `ollama` server has to be configured. For reference, see examples for the [ollama service running locally](../examples/config/gin-ollama-local.yaml) and for the [ollama service running on TEADAL Node](../examples/config/gin-ollama-tdl-node.yaml).
+1. `ollama` requires `ollama` server to be accessible. The server can be installed either on the developer's workstation where the ASG is run or on a server accessible from the developer's workstation. In any case, the address of the `ollama` server has to be configured. For reference, see examples for the [ollama service running locally](../examples/config/gin-ollama-local.yaml) and for the [ollama service running on TEADAL Node](../examples/config/gin-ollama-tdl-node.yaml). To check accessibility of Ollama service enabled on Teadal Node, you can, for example, invoke:
+```sh
+$ curl <teadal-node-ip>/ollama/api/tags | python -m json.tool
+```
 
 2. `IBM WatsonX` provider is available through the IBM Cloud as a service. To use this provider, one must be registered with the IBM cloud and obtain the API key and the projectID as shown in the [ASG-watsonx configuration example](../examples/config/gin-watsonx.yaml). 
 
