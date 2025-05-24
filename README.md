@@ -22,12 +22,12 @@ To contribute to the ASG project, follow instructions [here (TBD)](./docs/00-dev
 
 The project contains several simple examples.
 
-These two examples are powered by the GIN Executor. They are fully functional data product but do not have additional capabilities, such as caching, encoding, etc.
+These two examples are powered by the GIN Executor. They are fully functional data products but do not have additional capabilities, such as caching, encoding, etc.
 1. Medical Pilot [pre-caching example](./examples/pilot-medical/README.md)
 1. Industry Pilot [pre-caching example](./examples/pilot-industry/README.md)
 
 These new examples are powered by the ASG-Runtime and, in addition to serving the defined data endpoints, include service endpoints and can be configured to cache and encode the data.
-1. Medical pilot [example with caching (TBD)](./examples/sfdp-med/README.md)
+1. Medical pilot [example with caching](./examples/sfdp-med/README.md)
 1. Industry pilot [example with caching](./examples/sfdp-ind/README.md)
 1. Viticulture pilot [example with caching (TBD)](./examples/sfdp-vit-new/README.md)
 1. Mobility pilot [example with caching (TBD)](./examples/pilot-mob-new/README.md)
