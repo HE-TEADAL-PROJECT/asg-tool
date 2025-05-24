@@ -1,0 +1,6 @@
+fastapi
+uvicorn
+# change the link to use http is this is your setup
+# git+https://gitlab.teadal.ubiwhere.com/teadal-tech/asg-runtime.git
+# git+ssh://git@gitlab.teadal.ubiwhere.com/teadal-tech/asg-runtime.git
+git+ssh://git@gl-tdl/teadal-tech/asg-runtime.git

@@ -1,0 +1,17 @@
+# syntax=docker/dockerfile:1.3
+FROM registry.teadal.ubiwhere.com/teadal-public-images/asg-runtime:0.0.1
+
+# Set working directory
+WORKDIR /app
+
+RUN pip install --no-cache-dir uvicorn fastapi
+
+# Copy app source code
+COPY app.py .
+COPY transforms ./transforms
+
+# Expose FastAPI port
+EXPOSE 8000
+
+# Command to run the app
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]

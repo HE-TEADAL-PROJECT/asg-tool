@@ -129,7 +129,7 @@ def _get_args_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "-t", 
         type=str, 
-        default="./transform/", 
+        default="./transforms/", 
         help="Transformations functions implementation folder"
     )
 
@@ -215,7 +215,7 @@ if __name__ == "__main__":
         logger.debug(f"Writing SFDP to file: \n{sfdp_path}")
         file.write(rendered_sfdp)
 
-    sfdp_transform_path = f"{output_path}{os.sep}transform{os.sep}"
+    sfdp_transform_path = f"{output_path}{os.sep}transforms{os.sep}"
     if index == 0 :
         logger.debug(f"Copying template elements to the SFDP project")
         shutil.copy(f"{SFDP_TEMPLATE_DIR}{os.sep}README.md", output_path)

@@ -28,7 +28,7 @@ These two examples are powered by the GIN Executor. They are fully functional da
 
 These new examples are powered by the ASG-Runtime and, in addition to serving the defined data endpoints, include service endpoints and can be configured to cache and encode the data.
 1. Medical pilot [example with caching (TBD)](./examples/sfdp-med/README.md)
-1. Industry pilot [example with caching (TBD)](./examples/sfdp-ind/README.md)
+1. Industry pilot [example with caching](./examples/sfdp-ind/README.md)
 1. Viticulture pilot [example with caching (TBD)](./examples/sfdp-vit-new/README.md)
 1. Mobility pilot [example with caching (TBD)](./examples/pilot-mob-new/README.md)
 1. Financial pilot [example with caching (TBD)](./examples/pilot-fin-new/README.md)
