@@ -8,7 +8,6 @@ black.out
 ruff.out
 
 # Environments
-.env
 .venv
 ENV/
 env.bak/

@@ -1,6 +1,7 @@
 import os
 import importlib.util
 import shutil
+import hashlib
 import filecmp
 from pathlib import Path
 from typing import Callable
@@ -80,10 +81,33 @@ def process_file(
         new_lines.insert(old_line_idx + 1, replacement_line + "\n")
         logger.debug(f"inserted new import in {src_file}")
 
-    with dest_file.open("w", encoding="utf-8") as f:
+    with dest_file.open("w", encoding="utf-8", newline="\n") as f:
         f.writelines(new_lines)
 
     logger.debug(f"processed: {src_file} -> {dest_file}")
+
+
+def file_hash(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(8192), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def copy_file_if_changed(src, dst_dir):
+    dst = os.path.join(dst_dir, os.path.basename(src))
+
+    if not os.path.exists(dst):
+        shutil.copy2(src, dst)
+        logger.debug(f"Copied {src} → {dst} (new file)")
+        return
+
+    if file_hash(src) != file_hash(dst):
+        shutil.copy2(src, dst)
+        logger.debug(f"copied {src} → {dst} (content changed)")
+    else:
+        logger.debug(f"skipped {src}, identical")
 
 
 def copy_replacing_line(
@@ -94,6 +118,25 @@ def copy_replacing_line(
     """
     for src_file, dest_file in iter_files(from_dir, to_dir, ext):
         process_file(src_file, dest_file, line_to_replace, replacement_line)
+
+
+def copy_file_if_newer(src: str, dst_dir: str):
+    dst = os.path.join(dst_dir, os.path.basename(src))
+
+    # If destination does not exist → copy
+    if not os.path.exists(dst):
+        logger.debug(f"Copying {src} → {dst} (new file)")
+        shutil.copy2(src, dst)
+        return
+
+    # Compare modification times
+    src_mtime = os.path.getmtime(src)
+    dst_mtime = os.path.getmtime(dst)
+    if src_mtime > dst_mtime:
+        logger.debug(f"copying {src} → {dst} (newer source)")
+        shutil.copy2(src, dst)
+    else:
+        logger.debug(f"skipping {src}, up to date")
 
 
 def copy_files(from_dir: str, to_dir: str, ext: str = ".py") -> None:

@@ -76,6 +76,7 @@ clean-all: clean ## Clean up generated files and virtual environment
 
 .PHONY: install
 install: ## Install the project locally, in use mode
+	$(PIP) install --upgrade pip
 	$(PIP) install -e .
 
 .PHONY: install-dev

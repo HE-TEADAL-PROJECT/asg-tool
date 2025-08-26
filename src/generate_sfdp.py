@@ -1,6 +1,5 @@
 import os
 from dotenv import load_dotenv
-import shutil
 import argparse
 import sys
 from pprint import pformat
@@ -27,7 +26,7 @@ SFDP_TEMPLATE_FILES = [
     "README.md",
     "requirements-base.txt",
     "requirements-dev.txt",
-    "requirements-local.txt",   
+    "requirements-local.txt",
 ]
 
 
@@ -42,11 +41,11 @@ def _write_output(contents) -> str:
     app_file, index = files_helper.get_next_filename(
         folder=to_dir, base_name="app", ext=".py"
     )
-    if index == 0:
-        logger.debug(f"copying common files from {from_dir} to {to_dir}")
-        for fname in SFDP_TEMPLATE_FILES:
-            logger.debug(f"copying {fname}")
-            shutil.copy(os.path.join(SFDP_TEMPLATE_DIR, fname), to_dir)
+
+    logger.debug(f"copying template files from {from_dir} to {to_dir}")
+    for fname in SFDP_TEMPLATE_FILES:
+        fpath = os.path.join(SFDP_TEMPLATE_DIR, fname)
+        files_helper.copy_file_if_newer(fpath, to_dir)
 
     logger.debug(
         f"copying transform files from {from_transforms_dir} to {to_transforms_dir}"
@@ -59,7 +58,7 @@ def _write_output(contents) -> str:
         replacement_line=ASG_RUNTIME_IMPORT,
     )
 
-    with open(app_file, "w") as f:
+    with open(app_file, "w", encoding="utf-8", newline="\n") as f:
         logger.debug(f"writing contents to {app_file}")
         f.write(contents)
 
@@ -186,6 +185,7 @@ def main(args):
     app_file = _write_output(rendered)
 
     logger.info(f"SFDP app generation complete, the code is in {app_file}")
+
 
 if __name__ == "__main__":
     load_dotenv()

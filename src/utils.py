@@ -6,22 +6,17 @@ import logging
 ASG_TOOL_LOGGER = "asg_tool"
 logger = logging.getLogger(ASG_TOOL_LOGGER)
 
-gin_loggers = [
-    "base", 
-    "llm", 
-    "agentic_workflow", 
-    "tool_calling", 
-    "mapping_service"
-]
+gin_loggers = ["base", "llm", "agentic_workflow", "tool_calling", "mapping_service"]
 
 noisy_lib_loggers = [
-    "httpx", 
-    "openai",        
-    "_config",       
-    "_base_client", 
+    "httpx",
+    "openai",
+    "_config",
+    "_base_client",
     "_trace",
     "_client",
 ]
+
 
 def setup_logging():
     # first, set up my logging, just to enable logging GIN_DEBUG
@@ -42,39 +37,45 @@ def setup_logging():
         for name in gin_loggers:
             _silence_logger(name, logging.WARNING)
 
-    # silence other unwanted loggers     
-    # for name in noisy_lib_loggers:
-    #     _silence_logger(name, logging.WARNING)
+    # silence other unwanted loggers
+    for name in noisy_lib_loggers:
+        _silence_logger(name, logging.WARNING)
 
-def _silence_logger(noisy_logger_name:str, level):
+
+def _silence_logger(noisy_logger_name: str, level):
     noisy_logger = logging.getLogger(noisy_logger_name)
     noisy_logger.setLevel(level)  # cap them unless GIN_DEBUG is set
-    noisy_logger.propagate = True   # let it bubble to your root handlers
-            
+    noisy_logger.propagate = True  # let it bubble to your root handlers
+
 
 def _setup_logging():
-    format="%(asctime)s [%(levelname)s] %(module)s.%(funcName)s.%(lineno)d: %(message)s"
-    formatter = Formatter(format,datefmt="%H:%M")
-    handler=logging.StreamHandler(sys.stdout)
+    format = (
+        "%(asctime)s [%(levelname)s] %(module)s.%(funcName)s.%(lineno)d: %(message)s"
+    )
+    formatter = Formatter(format, datefmt="%H:%M")
+    handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(formatter)
-    logging.basicConfig(      
+    logging.basicConfig(
         handlers=[handler],
         level=logging.WARNING,
         force=True,  # override previous handlers
     )
     logging.getLogger(ASG_TOOL_LOGGER).setLevel(
-        logging.DEBUG if os.getenv("DEBUG") else logging.INFO)
+        logging.DEBUG if os.getenv("DEBUG") else logging.INFO
+    )
+
 
 COLORS = {
-    logging.DEBUG: "\033[34m",              # blue
-    logging.INFO: "\033[32m",               # green
-    logging.WARNING: "\033[33m",            # yellow
-    logging.ERROR: "\033[31m",              # red
-    logging.CRITICAL: "\033[41m\033[30m",   # red bg, black text
+    logging.DEBUG: "\033[34m",  # blue
+    logging.INFO: "\033[32m",  # green
+    logging.WARNING: "\033[33m",  # yellow
+    logging.ERROR: "\033[31m",  # red
+    logging.CRITICAL: "\033[41m\033[30m",  # red bg, black text
 }
 
+
 class Formatter(logging.Formatter):
-    def __init__(self, fmt: str, datefmt: str=None, use_color: bool=True):
+    def __init__(self, fmt: str, datefmt: str, use_color: bool = True):
         super().__init__(fmt=fmt, datefmt=datefmt)
         self.fmt = fmt
         self.datefmt = datefmt
@@ -87,7 +88,7 @@ class Formatter(logging.Formatter):
         formatter = logging.Formatter(fmt, self.datefmt)
         return formatter.format(record)
 
-    
+
 # %(pathname)s → full file system path (too long, usually not useful in logs)
 # %(filename)s → just the file name (e.g. my_module.py)
 # %(module)s → file name without extension (e.g. my_module)

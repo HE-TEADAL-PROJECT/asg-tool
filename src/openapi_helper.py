@@ -7,6 +7,7 @@ def load_openapi_spec(file_path: str) -> dict:
     with open(file_path, "r") as file:
         return dict(yaml.safe_load(file))
 
+
 def get_sfdp_endpoints(fdp_spec: dict, asg_spec: dict) -> list[dict]:
     """
     Cross-reference ASG spec with FDP spec and extract endpoint definitions.
@@ -19,12 +20,16 @@ def get_sfdp_endpoints(fdp_spec: dict, asg_spec: dict) -> list[dict]:
 
     for sfdp_endpoint in asg_spec["sfdp_endpoints"]:
         for sfdp_ep_name, sfdp_ep_content in sfdp_endpoint.items():
-            fdp_path = sfdp_ep_content.get("fdp_path")      # returns value or None
-            sfdp_path = sfdp_ep_content.get("sfdp_path")    # returns value or None
-            sfdp_description = sfdp_ep_content.get("sfdp_endpoint_description", "No description")
+            fdp_path = sfdp_ep_content.get("fdp_path")  # returns value or None
+            sfdp_path = sfdp_ep_content.get("sfdp_path")  # returns value or None
+            sfdp_description = sfdp_ep_content.get(
+                "sfdp_endpoint_description", "No description"
+            )
 
             if not fdp_path or fdp_path not in fdp_paths:
-                logger.warning(f"asg_spec references unknown FDP path {fdp_path} for {sfdp_ep_name} SFDP endpoint, will not include this endpoint")
+                logger.warning(
+                    f"asg_spec references unknown FDP path {fdp_path} for {sfdp_ep_name} SFDP endpoint, will not include this endpoint"
+                )
                 continue
 
             for method, details in fdp_paths[fdp_path].items():
@@ -39,7 +44,13 @@ def get_sfdp_endpoints(fdp_spec: dict, asg_spec: dict) -> list[dict]:
                 ]
 
                 # Resolve response model
-                schema = details.get("responses", {}).get("200", {}).get("content", {}).get("application/json", {}).get("schema", {})
+                schema = (
+                    details.get("responses", {})
+                    .get("200", {})
+                    .get("content", {})
+                    .get("application/json", {})
+                    .get("schema", {})
+                )
                 response_ref = schema.get("$ref") or schema.get("items", {}).get("$ref")
                 response_model_name = ""
                 response_model_spec: dict = {}
@@ -62,13 +73,16 @@ def get_sfdp_endpoints(fdp_spec: dict, asg_spec: dict) -> list[dict]:
                         "description": sfdp_description,
                         "response_model": {
                             "name": response_model_name,
-                            "properties": response_model_spec.get("properties", response_model_spec),
+                            "properties": response_model_spec.get(
+                                "properties", response_model_spec
+                            ),
                         },
                     }
                 )
 
     logger.debug(f"returning {len(endpoints)} endpoints")
     return endpoints
+
 
 # leaving the old (refactored) version in place, just for checking
 #  TODO delete this method

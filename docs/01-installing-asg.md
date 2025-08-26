@@ -47,9 +47,16 @@ $ python -m pip install --upgrade pip
 
 ## Install runtime dependencies
 
+You can install dependencies using [requirements.txt](../.reqs/requirements.txt) file:
 ```sh
 $ python -m pip install -r .reqs/requirements.txt
 ```
+
+Alternatively, you can use [Makefile](../Makefile) if you have `make` installed:
+```sh
+$ make install
+```
+
 
 > **Note 1**  
 > Note that this can take noticeable amount of time, be ready to take a `~8` minutes break :-).
@@ -95,5 +102,6 @@ generate_sfdp.py: error: the following arguments are required: -fdp_spec, -fdp_u
 
 ## Proceed generating the SFDP 
 
-- Configure the ASG and its GIN backend following the [ASG-Tool configuration instructions](./02-configuring-asg.md). 
-- Then follow the [ASG-Tool usage instructions](./04-generating-sfdp.md) to generate the SFDP.
+- Configure the ASG and its GIN backend following the [ASG-Tool Configuration Instructions](./02-configuring-asg.md). 
+- Create ASG Specification File as described in [SFDP Specification Instructions](./03-specifying-sfdp.md)
+- Then follow the [ASG-Tool Usage Instructions](./04-generating-sfdp.md) to generate the SFDP.
