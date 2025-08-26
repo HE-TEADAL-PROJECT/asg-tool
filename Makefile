@@ -59,16 +59,18 @@ fmt:  ## Format code with black and auto-fix lint with ruff
 	black src
 	ruff check src --fix
 
-
 .PHONY: clean
 clean: ## Clean up generated files
-	find $(ROOT_DIR) -type d -name '__pycache__' -exec rm -rf {} \;
-	find $(ROOT_DIR) -type d -name '*.egg-info' -exec rm -rf {} \;
-	find $(ROOT_DIR) -type f -name '*.pyc' -delete
-	rm -fr $(ROOT_DIR)/.pytest_cache $(ROOT_DIR)/.mypy_cache $(ROOT_DIR)/.ruff_cache
-	rm -rf $(ROOT_DIR)/build $(ROOT_DIR)/dist
-	@echo "Clean complete."
-
+	find $(ROOT_DIR)/src -type f -name '*.pyc' -delete
+	rm -rf $(ROOT_DIR)/src/__pycache__
+	rm -rf $(ROOT_DIR)/src/*.egg-info
+	rm -rf $(ROOT_DIR)/.pytest_cache
+	rm -fr $(ROOT_DIR)/.pytest_cache
+	rm -fr $(ROOT_DIR)/.mypy_cache
+	rm -fr $(ROOT_DIR)/.ruff_cache
+	rm -rf $(ROOT_DIR)/build 
+	rm -rf $(ROOT_DIR)/dist
+	echo "Clean complete."
 
 .PHONY: clean-all
 clean-all: clean ## Clean up generated files and virtual environment
@@ -81,5 +83,6 @@ install: ## Install the project locally, in use mode
 
 .PHONY: install-dev
 install-dev: ## Install the project locally, in dev mode
+	$(PIP) install --upgrade pip
 	$(PIP) install -e .[dev]
 

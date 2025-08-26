@@ -12,42 +12,53 @@ SFDP generation with ASG-Tool can be performed locally on developer's workstatio
 1. Invoke the tool to generate the data product according to the inputs and the configuration, as described in [Generating the SFDP](./docs/04-generating-sfdp.md)
 2. Inspect and validate the generated data product, e.g., as shown in [Validating the newly created SFDP](./docs/05-validating-sfdp.md)
 
-When the new SFDP is validated and found acceptable for the deployment, proceed to creating TEADAL deployement artifacts and to promoting the SFDP to deployment as described [here (TBD)](./docs/06-deploying-sfdp.md).
+When the new SFDP is validated and found acceptable for the deployment, proceed to creating TEADAL deployement artifacts and to promoting the SFDP to deployment as described [here](./docs/06-deploying-sfdp.md).
 
-It is planned to make the ASG-Tool available on the TEADAL Node. Consult TEADAL Node documentation for the status of this integration and to learn more about enabling and operating the service there (link TBD).
+It is planned to make the ASG-Tool available on the TEADAL Node. Consult TEADAL Node documentation for the status of this integration and to learn more about enabling and operating the service there.
 
-To contribute to the ASG project, follow instructions [here (TBD)](./docs/00-developing-asg.md)
+To contribute to the ASG project, follow instructions [here](./docs/00-developing-asg.md).
 
 ## Examples
+There are several up-to-date examples created for TEADAL pilots by the recent version of the ASG-Tool powered by the ASG-Runtime. These examples were once contain in the `examples` folder of this repo and were moved to their own repos where they can be updated if needed as the pilot case or the ASG system evolve. As opposed to the older examples that are still kept in the `examples` folder for historical resons, these new examples support caching and other shared features provided by the ASG-Runtime. These examples serve both the specified data endpoints and the service endpoints. Here are the pointers to example repos:
+1. Medical - [sfdp-med-node01](https://gitlab.teadal.ubiwhere.com/teadal-tech/sfdp-med-node01)
+2. Industry - TBD
+3. Viticulture - TBD
+4. Mobility - TBD
+5. Financial - TBD
+6. Regional Planning - TBD
 
-The project contains several simple examples.
-
-These two examples are powered by the GIN Executor. They are fully functional data products but do not have additional capabilities, such as caching, encoding, etc.
-1. Medical Pilot [pre-caching example](./examples/pilot-medical/README.md)
-1. Industry Pilot [pre-caching example](./examples/pilot-industry/README.md)
-
-These new examples are powered by the ASG-Runtime and, in addition to serving the defined data endpoints, include service endpoints and can be configured to cache and encode the data.
-1. Medical pilot [example with caching](./examples/sfdp-med/README.md)
-1. Industry pilot [example with caching](./examples/sfdp-ind/README.md)
-1. Viticulture pilot [example with caching (TBD)](./examples/sfdp-vit-new/README.md)
-1. Mobility pilot [example with caching (TBD)](./examples/pilot-mob-new/README.md)
-1. Financial pilot [example with caching (TBD)](./examples/pilot-fin-new/README.md)
-1. Regional Planning pilot [example with caching (TBD)](./examples/pilot-reg-new/README.md)
-
-### The repo structure
+## The repo structure
 
 ```plaintext
 teadal-connectors/
-├── README.md                      # This File
-├── .gitignore                     # Project gitignore file
-├── .reqs/                         # pip of dependencies for running the tool
-|                                  # including the GIN wheel
-├── config/                        # example configuration files
-├── docs/                          # documentation files
-├── examples/                      # examples and some older files
-├── sfdp-template/                 # all the files required to 
-├── transforms/                    # transforms folder 
-├── src/                           # Source code files
-|   ├── generate_sfdp.py           # Main entry point of the application
+├── .reqs/                  # pip dependencies (include the GIN wheel) 
+├── config/                 # configuration files (adjust to your setup)
+├── docs/                   # documentation files
+├── examples/               # example inputs, configs, and results (some maybe outdated)
+├── sfdp-template/          # template files for new SFDP project 
+├── src/                    # source code files
+|   ├── generate_sfdp.py    # main entry point of the application
+├── transforms/             # transforms folder (adjust to your use case)
+├── .gitignore              # to keep git repo clean
+├── Makefile                # to automate dev tasks
+├── pyproject.toml          # project manifest
+├── README.md               # this file :-)
 ```
 
+## [Examples Folder](./examples/)
+
+### ASG-Tool Input files
+These files can be used as inputs for testing the tool. If you have additional valid input files, you can add them here for others to gain experience:
+- [ASG Instruction Folder](./examples/asg-instructions/) contains example SFDP specs
+- [Config Folder](./examples/config/) contains example configuration fails for different LLMs/models
+- [OpenAPI Specs Folder](./examples/openapi-specs/) contains example OpenAPI specs for project FDPs
+
+### Examples of ASG-Tool Usage
+Here we include two usage examples, each contains a folder called `inputs` with the inputs used for this example, a folder named `results` with the `app.py` generated by an older version of SFDP generated (powered by the GIN Executor and not by the ASG-Runtime), and a `README` file describing the command line used to create the results from the inputs. Both examples feature fully functional data products but do not have additional capabilities, such as caching, encoding, etc.
+1. Medical Pilot [pre-caching example](./examples/pilot-medical/README.md)
+2. Industry Pilot [pre-caching example](./examples/pilot-industry/README.md)
+
+### Old Files
+This folder contains some older artifacts that were not removed since the earliest versions. Usefulness of these artifacts is limited so use with causion:
+- [Generated Servers Folder](./examples/generated_servers/). Here you can find examples of SFDPs generated before ASG system was fully established. These SFDPs are standalone FastAPI servers that might still work if the FDP endpoint is still correct or is corrected to point to the accessible FDP. These SFDPs do not depend on ASG-runtime and do not exibit features like caching, stats, etc. These examples are not deleted as they represent point in time when these capability was first demonstated at project GA in Berlin (October 2024).
+- [Notebooks Folder](./examples/notebooks/) contain several notebooks that were used for demos and experimentation; most probably outdated and can be deleted.
