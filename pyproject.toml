@@ -1,0 +1,58 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "asg-tool"
+version = "0.1.0"
+description = "A tool to generate SFDP apps"
+authors = [{name = "TEADAL-WP4"}]
+readme = "README.md"
+requires-python = ">=3.12"
+
+# dependencies
+dependencies = [
+    "fastapi",
+    "fastapi-cli",
+    "uvicorn",
+    "Jinja2",
+    "GIN @ file:.reqs/GIN-0.1.1-py3-none-any.whl",
+]
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "mypy",
+    "black",
+    "ruff",
+    "coverage",
+    "pre-commit",
+    "types-PyYAML",
+]
+
+[tool.mypy]
+# mypy_path = "src"
+# explicit_package_bases = true
+ignore_missing_imports = true
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+# packages = [""]   # means "this is the root package"
+packages = { find = { where = ["src"] } }   # Look inside src/ for importable packages (folders with __init__.py).
+
+[tool.pytest.ini_options]
+log_cli = true
+log_cli_level = "DEBUG"
+log_cli_format = "%(asctime)s [%(levelname)8s] %(message)s (%(filename)s:%(lineno)s)"
+log_cli_date_format = "%Y-%m-%d %H:%M:%S"
+
+# maybe changes (did not want to mess with what's already documented)
+#
+# use this to make a nicer looking entry parse_endpoints
+# [project.scripts]
+# asg-tool = "generate_sfdp:main"
+# use this if decide to have explicit packages under src/
+# [tool.setuptools]
+# packages = { find = {} }
+# 
+# [tool.setuptools.packages.find]
+# where = ["src"]

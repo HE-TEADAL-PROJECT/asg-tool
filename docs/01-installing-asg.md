@@ -46,34 +46,54 @@ $ python -m pip install --upgrade pip
 ```
 
 ## Install runtime dependencies
+
 ```sh
 $ python -m pip install -r .reqs/requirements.txt
 ```
 
-On Windows, the following problem can occur. The solution  is described [here](https://stackoverflow.com/questions/73969269/error-could-not-build-wheels-for-hnswlib-which-is-required-to-install-pyprojec/76245995#76245995).
+> **Note 1**  
+> Note that this can take noticeable amount of time, be ready to take a `~8` minutes break :-).
+
+> **Note 2**  
+> On Windows, the following problem can occur. The solution  is described [here](https://stackoverflow.com/> questions/73969269/error-could-not-build-wheels-for-hnswlib-which-is-required-to-install-pyprojec/76245995#76245995).
+> ```sh
+> ...
+> Building wheels for collected packages: chroma-hnswlib
+>   Building wheel for chroma-hnswlib (pyproject.toml) ... error
+>   error: subprocess-exited-with-error
+> 
+>   × Building wheel for chroma-hnswlib (pyproject.toml) did not run successfully.
+>   │ exit code: 1
+>   ╰─> [5 lines of output]
+>       running bdist_wheel
+>       running build
+>       running build_ext
+>       building 'hnswlib' extension
+>       error: Microsoft Visual C++ 14.0 or greater is required. Get it with "Microsoft C++ Build Tools": https://visualstudio.microsoft.com/visual-cpp-build-tools/
+>       [end of output]
+> 
+>   note: This error originates from a subprocess, and is likely not a problem with pip.
+>   ERROR: Failed building wheel for chroma-hnswlib
+> Failed to build chroma-hnswlib
+> ERROR: Failed to build installable wheels for some pyproject.toml based projects (chroma-hnswlib)
+> ``` 
+
+## Verify the installation
+
+See the program is installed and can be started by running:
 ```sh
-...
-Building wheels for collected packages: chroma-hnswlib
-  Building wheel for chroma-hnswlib (pyproject.toml) ... error
-  error: subprocess-exited-with-error
+python src/generate_sfdp.py
+```
 
-  × Building wheel for chroma-hnswlib (pyproject.toml) did not run successfully.
-  │ exit code: 1
-  ╰─> [5 lines of output]
-      running bdist_wheel
-      running build
-      running build_ext
-      building 'hnswlib' extension
-      error: Microsoft Visual C++ 14.0 or greater is required. Get it with "Microsoft C++ Build Tools": https://visualstudio.microsoft.com/visual-cpp-build-tools/
-      [end of output]
+If everything is ok, the program will complain about the lack of the required command line parameters:
 
-  note: This error originates from a subprocess, and is likely not a problem with pip.
-  ERROR: Failed building wheel for chroma-hnswlib
-Failed to build chroma-hnswlib
-ERROR: Failed to build installable wheels for some pyproject.toml based projects (chroma-hnswlib)
-``` 
+```sh
+usage: generate_sfdp.py [-h] -fdp_spec FDP_SPEC -fdp_url FDP_URL [-fdp_timeout FDP_TIMEOUT] -i I
+                        [-k K] [-o O] [-c C] [-t T]
+generate_sfdp.py: error: the following arguments are required: -fdp_spec, -fdp_url, -i
+```
 
 ## Proceed generating the SFDP 
 
-- Configure the ASG and its GIN backend following the instructions [here](./02-configuring-asg.md) 
-- Follow [these instructions](./04-generating-sfdp.md) to generate the SFDP.
+- Configure the ASG and its GIN backend following the [ASG-Tool configuration instructions](./02-configuring-asg.md). 
+- Then follow the [ASG-Tool usage instructions](./04-generating-sfdp.md) to generate the SFDP.

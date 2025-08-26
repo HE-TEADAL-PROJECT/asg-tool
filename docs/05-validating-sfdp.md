@@ -2,7 +2,9 @@
 
 After sucessful SFDP generation as described [here](./04-generating-sfdp.md), `cd` to the output folder (the one that was spesified by the `-o` parameter).
 
-The folder should contain the SFDP server code in `app.py`, the `requirements.txt` file, the `wheel` for the `GIN executor` dependency (TBD change when this is replaced by gitlab ref) and the directory with the transformation code to be executed by the server.
+The folder should contain the SFDP server code in `app.py`, the `requirements.txt` file, the `wheel` for the `GIN executor` dependency (TBD change when this is replaced by gitlab ref) and the directory with the transformation code to be executed by the server. 
+
+Here we provide the generic instructions. For the most updated details, please look at the current [README included with the SFDP app template](../sfdp-template/README.md).
 
 To validate the generated SFDP:
 - Create and activate virtual environment with `python3.12`

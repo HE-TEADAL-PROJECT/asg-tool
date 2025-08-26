@@ -10,6 +10,7 @@ ASG-SFDP inherits its features from the **asg-runtime** library and supports the
 
 - `/service/stats`
 - `/service/settings`
+- `/service/transforms`
 - `/service/origin_cache/clean`
 - `/service/response_cache/clean`
 
@@ -34,7 +35,7 @@ To run SFDP locally:
 
 1. Clone the repository and enter the cloned directory.
 ```sh
-$ git clone <sfdp-ropo-link> <sfdp-project-dir>
+$ git clone <sfdp-repo-link> <sfdp-project-dir>
 $ cd <sfdp-project-dir>
 ```
 
@@ -66,20 +67,29 @@ $ pip list
 $ python -m pip install --upgrade pip
 ```
 
-1. Install dependencies. Note that one of the requirements referred to in [requirements.txt](./requirements.txt) is pulling `asg-runtime` library sources from git. Check whether you need to modify repo link, e.g., to accomodate your gitconfig or in case the repo was relocated. Note also that for some configuration choices additional packages might have to be installed as explained in [.env file](./.env) file. If these configuration options are selected without installing the required packages, the app will fail to start and report the problem.
+1. Install dependencies. ASG-generated apps depend on `fastapi` and `uvicorn` packages and, for most of the common funtionality, on `asg-runtime` package. 
 
-To install the requirements pulling ASG-Runtime from its git repo:
+- To install locally, use the [requirements-local.txt](./requirements-local.txt) for pulling `asg-runtime` library sources from the TEADAL Gitlab. Check whether you need to modify repo link, e.g., to accomodate your `gitconfig` or in case the repo was relocated. Note also that for some configuration choices additional packages might have to be installed as explained in [.env file](./.env) file. If these configuration options are selected without installing the required packages, the app will fail to start and report the problem.
+
 ```sh
 # in regular mode
-pip install -r requirements.txt
+pip install -r requirements-local.txt
 
-# in development mode:
+# or, to run in dev mode:
 pip install -r requirements-dev.txt
+
+# alternatively you can rely on build tools:
+$ pip install .[local]      # for local
+$ pip install .[local,dev]  # for dev mode install
 ```
 
-1. Inspect the settings in the [.env file](./.env) file match your needs.
-
-1. Start the locally:
+1. Inspect the settings in the [.env file](./.env) file match your needs, and if needed install additional packages, such as `diskcashe` or `redis`.
+```sh
+$ pip install .[cache-disk]     # if you require disk cache
+$ pip install .[cache-redis]    # if you require redis cache
+$ pip install .[logging-rich]   # for nicer formatted logs
+```
+1. Start the service locally:
 
 ```sh
 # in regular mode
@@ -93,7 +103,7 @@ fastapi dev
 
 On a system that supports containerization (e.g., Docker, Podman), you can build and run a local container image:
 
-To build image with the latest asg-runtime code, use [Dockerfile_from_src](./Dockerfile_from_src). 
+1. To build image with the latest asg-runtime code, use [Dockerfile_from_src](./Dockerfile_from_src). 
 It pulls from a private GitLab repository of the project and thus requires valid `ssh` configuration. 
 You can follow instructions below or, if you know what you are doing, you can change the `Dockerfile` and, posibly also the `requirements.txt` to support `http` access with tokens.
 
@@ -116,7 +126,7 @@ ssh-add ~/.ssh/<key>  # use your actual private key
 DOCKER_BUILDKIT=1 docker build --ssh default -t <asg-sfdp>:local -f Dockerfile_from_src .
 ```
 
-Alternatively, it is possible to build the image from the base `asg-runtime` library image using the [Dockerfile_from_img](./Dockerfile_from_img). Note that you might want to change the image tag used before running the build command as follows:
+1. Alternatively, it is possible to build the image from the base `asg-runtime` library image using the [Dockerfile_from_img](./Dockerfile_from_img). Note that you might want to change the image tag used before running the build command as follows:
 ```sh
 docker build  -t <asg-sfdp:local -f Dockerfile_from_img  .
 ```
@@ -142,8 +152,7 @@ If you are building inside a VM and encounter network issues, try:
 docker build --network=host -t <asg-sfdp>:local .
 ```
 
-If this does not help, you might need additional infrastructure troubleshooting.  
-*(TODO: Add instructions)*
+If this does not help, you might need additional infrastructure troubleshooting. 
 
 Once the image is created (check with `docker images`), you can run the container:
 
@@ -156,24 +165,35 @@ Again, if running inside a VM with networking issues, you can run with host netw
 ```sh
 docker run --rm -it --network=host <asg-sfdp>:local
 ```
-### Deploying on k8s
-TODO
+### Deploying on k8s/TEADAL Node
+When you have validated the app, push it into a new repo in your pilot's group in the TEADAL Gitlab. This will trigger CI script for building and pushing the image into your pilot's group registry. From there, images can be deployed after adding the reqiuered manifests and policy files in the target k8s cluster / TEADAL Node.
 
 ## Accessing the Service
 
-When the SFDP app is running, its endpoints can be accessed either through a web browser or tools like `curl`.
+When the SFDP app is running, its endpoints can be accessed either through a web browser to `http://<service IP>/docs` for swagger, or using tools like `curl`. For local installations, the `service IP` will be reported on a terminal, e.g., `127.0.0.1:8000`.
 
 ## Directory Structure
 
 ```plaintext
-.
-├── .env                # Example settings
-├── Dockerfile_from_img # Defines how to containerize the app
-├── Dockerfile_from_src # Defines how to containerize the app
-├── app.py              # The main FastAPI application
-├── requirements.txt    # Production dependencies
-├── requirements-dev.txt# Development-only dependencies
-├── transforms/         # Folder containing data transformation functions
-├── README.md/          # This file :-)
+|                           # Git files
+├── .gitatributes        
+├── .gitignore         
+|                           # Gitlab files     
+├── .gitlab-ci.yml           
+|                           # Docker files
+├── .dockerignore
+├── Dockerfile              # dockerfile used by Gitlab CI (from image)
+├── Dockerfile_from_img     # dockerfile to create container from asg-runtime image
+├── Dockerfile_from_src     # dockerfile to create container from asg-runtime source
+|                           # Requirements files
+├── requirements-docker.txt # external dependencies
+├── requirements-local.txt  # external plus asg-runtime
+├── requirements-dev.txt    # local plus dev tools
+|                           # application files     
+├── app.py                  # The main FastAPI application
+├── .env                    # application settings
+├── pyproject.toml          # application build settings
+├── transforms/             # transformation functions
+├── README.md/              # this file :-)
 ```
 

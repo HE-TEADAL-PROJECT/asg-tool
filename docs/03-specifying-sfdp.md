@@ -1,6 +1,33 @@
 # Specifying the SFDP to be generated
 
-ASG tool creates the SFDP as a FASTAPI application that serves data obtained from a source FDP, specified as `-fdp_url <url>` and `fdp_spec <path-to-file>` input paramaters, and transformed as decribed in a separate specification file that ASG tool receives as `-i <path-to-file>` (`i` here stands for the `instructions` :-) input parameter.
+ASG tool creates the SFDP as a FASTAPI application that serves data obtained from a source FDP, specified as `-fdp_url <url>` and `fdp_spec <path-to-file>` input paramaters, and transformed as described in a dedicated specification file that ASG tool receives as `-i <path-to-file>` (`i` here stands for the `instructions` :-) input parameter.
+
+To see the usage instructions, run the tool with `-h` or `--help`:
+
+```sh
+$ python src/generate_sfdp.py -h
+usage: generate_sfdp.py [-h] -fdp_spec FDP_SPEC -fdp_url FDP_URL
+                        [-fdp_timeout FDP_TIMEOUT] -i I [-k K] [-o O]
+                        [-c C] [-t T]
+
+A CLI tool for generating SFDP applications.
+
+options:
+  -h, --help            show this help message and exit
+  -fdp_spec FDP_SPEC    Path to the OpenAPI spec file or directory.
+  -fdp_url FDP_URL      FDP server URL.
+  -fdp_timeout FDP_TIMEOUT
+                        (Optional) timeout for FDP server requests, in
+                        seconds.
+  -i I                  Path to the SFDP specification file.
+  -k K                  (Optional) FDP API key.
+  -o O                  (Optional) Path to the output folder.
+  -c C                  (Optional) Path to GIN configuration file.
+  -t T                  (Optional) Path to transformations folder.
+
+Example usage: python src/generate_sfdp.py -fdp_spec <FDP_SPEC> -fdp_url
+-i I -o ./new_sfdp [-t T]
+```
 
 ## ASG Specification Format 
 

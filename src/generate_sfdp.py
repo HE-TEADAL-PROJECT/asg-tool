@@ -3,239 +3,196 @@ from dotenv import load_dotenv
 import shutil
 import argparse
 import sys
-import logging
-from gin.common.logging import Logging
-logger = logging.getLogger(Logging.BASE)
-
+from pprint import pformat
 from jinja2 import Environment, FileSystemLoader
+import files_helper
+import gin_helper
+from utils import setup_logging, logger
 
-import get_openapi_paths
-import handle_transform
+ASG_TOOL_IMPORT = "from gin.common.tool_decorator import make_tool"
+ASG_RUNTIME_IMPORT = "from asg_runtime import make_tool"
+SFDP_TEMPLATE_DIR = os.getenv("SFDP_TEMPLATE_DIR", f".{os.sep}sfdp-template")
+SFDP_TRANSFORMS_DIR = "transforms"
+SFDP_TEMPLATE_JINJA = os.getenv("SFDP_TEMPLATE_FILE", "sfdp_template.jinja2")
+SFDP_TEMPLATE_FILES = [
+    ".dockerignore",
+    ".env",
+    ".gitattributes",
+    ".gitignore",
+    ".gitlab-ci.yml",
+    "Dockerfile",
+    "Dockerfile_from_src",
+    "Dockerfile_from_img",
+    "pyproject.toml",
+    "README.md",
+    "requirements-base.txt",
+    "requirements-dev.txt",
+    "requirements-local.txt",   
+]
 
-def generate_sfdp(
-        fdp_spec_path: str, 
-        fdp_url: str, 
-        fdp_timeout: int,
-        fdp_key: str, 
-        instructions_path: str, 
-        gin_config_path: str, 
-        transforms_path: str) -> tuple[list[dict], dict]:
-    
-    fdp_spec = get_openapi_paths.load_openapi_spec(fdp_spec_path)
-    instructions = get_openapi_paths.load_openapi_spec(instructions_path)
 
-    endpoints = get_openapi_paths.parse_endpoints(fdp_spec, instructions)
-    logger.debug(f"Parsed {len(endpoints)} endpoints")
+def _write_output(contents) -> str:
+    from_dir = SFDP_TEMPLATE_DIR
+    from_transforms_dir = args.transforms
+    to_dir = args.output
+    to_transforms_dir = os.path.join(to_dir, SFDP_TRANSFORMS_DIR)
+    os.makedirs(to_dir, exist_ok=True)
+    os.makedirs(to_transforms_dir, exist_ok=True)
 
-    results = handle_transform.handle_transform_instructions(
-        instructions, 
-        gin_config_path, 
-        transforms_path)
-    logger.debug(f"After transform, there are {len(results)} results")
+    app_file, index = files_helper.get_next_filename(
+        folder=to_dir, base_name="app", ext=".py"
+    )
+    if index == 0:
+        logger.debug(f"copying common files from {from_dir} to {to_dir}")
+        for fname in SFDP_TEMPLATE_FILES:
+            logger.debug(f"copying {fname}")
+            shutil.copy(os.path.join(SFDP_TEMPLATE_DIR, fname), to_dir)
 
-    path_params = {}
-    query_params= {}
-    endpoints_full_connectors_specs = {}
-    for endpoint in endpoints:
-        for param in endpoint['parameters'] :
-            if param['in'] == 'path':
-                path_params[param['name']] = param
-            if param['in'] == 'query':
-                query_params[param['name']]  = param
+    logger.debug(
+        f"copying transform files from {from_transforms_dir} to {to_transforms_dir}"
+    )
+    files_helper.copy_replacing_line(
+        from_dir=from_transforms_dir,
+        to_dir=to_transforms_dir,
+        ext=".py",
+        line_to_replace=ASG_TOOL_IMPORT,
+        replacement_line=ASG_RUNTIME_IMPORT,
+    )
 
-        con_spec = handle_transform.create_spec_section(
-            endpoint ,
-            fdp_url, 
-            fdp_key, 
-            "apiToken", 
-            path_params, 
-            query_params,
-            fdp_timeout)
-        full_spec = handle_transform.add_export_section(
-            endpoint['sfdp_endpoint_name'], 
-            con_spec, 
-            results)
-        endpoints_full_connectors_specs[endpoint['sfdp_endpoint_name']] = full_spec
+    with open(app_file, "w") as f:
+        logger.debug(f"writing contents to {app_file}")
+        f.write(contents)
 
-    return endpoints, endpoints_full_connectors_specs
+    return app_file
 
-def _get_next_filename(
-        output_folder: str, 
-        base_name: str ="app", 
-        extension: str =".py") -> str:
-    
-    index = 0
-    while True:
-        filename = f"{base_name}{index if index > 0 else ''}{extension}"
-        file_path = os.path.join(output_folder, filename)
-        if not os.path.exists(file_path):  # Check if file exists
-            return file_path, index
-        index += 1
-    
+
+def _is_valid_file(path: str) -> str:
+    if not os.path.isfile(path):
+        raise argparse.ArgumentTypeError(f"File not found: {path}")
+    return path
+
+
+def _is_valid_folder(path: str) -> str:
+    if not os.path.isdir(path):
+        raise argparse.ArgumentTypeError(f"Folder not found: {path}")
+    return path
+
+
 def _get_args_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Generate SFDP for a given FDP and instructions."
+        description="A CLI tool for generating SFDP applications.",
+        epilog="""Example usage:
+            python src/generate_sfdp.py 
+            -fdp_spec examples/openapi-specs/medical-spec.yaml 
+            -fdp_url http://medicine01.teadal.ubiwhere.com/fdp-medicine-node01/ 
+            -i examples/asg-instructions/Medical-instructions.yaml 
+            -o 2025-07-2-med-sfdp""",
     )
 
     parser.add_argument(
         "-fdp_spec",
-        type=str,
+        type=_is_valid_file,
         required=True,
-        help="The path to the OpenAPI spec file or directory.",
+        help="Path to the FDP OpenAPI spec.",
     )
-
+    parser.add_argument("-fdp_url", type=str, required=True, help="The FDP server URL.")
     parser.add_argument(
-        "-fdp_url", 
-        type=str, 
-        required=True, 
-        help="The FDP server URL"
+        "-fdp_timeout", type=int, default=300, help="Timeout for FDP requests."
     )
-
-    parser.add_argument(
-        "-fdp_timeout", 
-        type=int, 
-        default=300, 
-        help="The FDP server URL"
-    )
-
     parser.add_argument(
         "-i",
-        type=str,
+        "--instructions",
+        type=_is_valid_file,
         required=True,
-        help="An instructions yaml file to define each SFDP endpoint transformation.",
+        help="Transformation instruction YAML.",
     )
-
     parser.add_argument(
-        "-k", 
-        type=str, 
-        default="DUMMY_KEY", 
-        help="Optional API key. Defaults to 'DUMMY_KEY'."
+        "-k",
+        "--api-key",
+        type=str,
+        default="DUMMY_KEY",
+        help="API key for FDP (optional).",
     )
-
     parser.add_argument(
-        "-o", 
-        type=str, 
-        default="./generated_servers/", 
-        help="Output folder location"
+        "-o",
+        "--output",
+        type=str,
+        default="./generated_servers/",
+        help="Output folder.",
     )
-
     parser.add_argument(
-        "-c", 
-        type=str, 
-        default="./config/gin-teadal-config.yaml", 
-        help="GIN configuration file."
+        "-c",
+        "--config",
+        type=_is_valid_file,
+        default="./config/gin-teadal-config.yaml",
+        help="GIN config file.",
     )
-
     parser.add_argument(
-        "-t", 
-        type=str, 
-        default="./transforms/", 
-        help="Transformations functions implementation folder"
+        "-t",
+        "--transforms",
+        type=_is_valid_folder,
+        default="./transforms/",
+        help="Folder with transformation scripts.",
     )
 
     return parser
 
-def _args_check_file(
-        filename: str, 
-        argname: str) -> str:
-    if not os.path.isfile(filename):
-        logger.error(f"Bad parameter {argname}: {filename} is not a file.")
-        sys.exit(1)
-    return filename
 
 def _render_sfdp_template(
-        template_folder_path: str,
-        template_file_name: str,
-        endpoints: list[dict], 
-        endpoints_full_connectors_specs: dict) -> str:
+    template_folder_path: str,
+    template_file_name: str,
+    endpoints: list[dict],
+    endpoint_specs: dict,
+) -> str:
 
     env = Environment(
-        loader=FileSystemLoader(template_folder_path), extensions=["jinja2.ext.loopcontrols"]
+        loader=FileSystemLoader(template_folder_path),
+        extensions=["jinja2.ext.loopcontrols"],
     )
     template = env.get_template(template_file_name)
     data = {
         "endpoints": endpoints,
-        "endpoints_full_connectors_specs": endpoints_full_connectors_specs,
+        "endpoint_specs": endpoint_specs,
     }
 
     rendered_content = template.render(data)
 
     return rendered_content
 
-def _args_check_folder(
-        foldername: str, 
-        argname: str) -> str:
-    if not os.path.isdir(foldername):
-        logger.error(f"Bad parameter {argname}: {foldername} is not a folder.")
+
+def main(args):
+    logger.info("Starting SFDP generation")
+
+    try:
+        endpoints, endpoint_specs = gin_helper.generate_sfdp(
+            fdp_spec_path=args.fdp_spec,
+            fdp_url=args.fdp_url,
+            fdp_timeout=args.fdp_timeout,
+            fdp_key=args.api_key,
+            instructions_path=args.instructions,
+            gin_config_path=args.config,
+            transforms_path=args.transforms,
+        )
+    except Exception as e:
+        logger.error(f"SFDP generation failed: {e}", exc_info=True)
         sys.exit(1)
-    return foldername
+
+    logger.info("SFDP generation suceeded, rendering the template")
+    rendered = _render_sfdp_template(
+        SFDP_TEMPLATE_DIR, SFDP_TEMPLATE_JINJA, endpoints, endpoint_specs
+    )
+
+    logger.info("SFDP template rendered, writing output")
+    app_file = _write_output(rendered)
+
+    logger.info(f"SFDP app generation complete, the code is in {app_file}")
 
 if __name__ == "__main__":
     load_dotenv()
-    DEBUG = os.getenv('DEBUG', None)
-    if DEBUG:
-        Logging(log_level="DEBUG")
-    SFDP_TEMPLATE_DIR = os.getenv('SFDP_TEMPLATE_DIR', f".{os.sep}sfdp-template")
-    SFDP_TEMPLATE_FILE = os.getenv('SFDP_TEMPLATE_FILE', "sfdp_template.jinja2")
-
-    logger.debug("Starting")
+    setup_logging()
+    logger.debug("creating args parser")
     parser = _get_args_parser()
+    logger.debug("parsing the args")
     args = parser.parse_args()
-
-    fdp_spec_path = _args_check_file(filename = args.fdp_spec, argname = "fdp_spec_path")
-    instructions_path = _args_check_file(filename = args.i, argname = "instructions_path")
-    gin_config_path = _args_check_file(filename = args.c, argname = "gin_config_path")
-    transforms_path = _args_check_folder(foldername = args.t, argname = "transforms_path")
-    fdp_url = args.fdp_url
-    fdp_timeout = args.fdp_timeout
-    fdp_key = args.k  
-    output_path = args.o
-
-    try:
-        endpoints, specs = generate_sfdp(
-            fdp_spec_path = fdp_spec_path, 
-            fdp_url = fdp_url, 
-            fdp_timeout = fdp_timeout,
-            fdp_key = fdp_key, 
-            instructions_path = instructions_path, 
-            gin_config_path = gin_config_path, 
-            transforms_path = transforms_path)
-        logger.debug(f"SFDP generation suceeded")
-    except Exception as e:
-        logger.error(f"Error generating the SFDP: {e}")
-        exit(1)
-
-    logger.debug(f"Rendering the template {SFDP_TEMPLATE_FILE} in {SFDP_TEMPLATE_DIR}")
-    rendered_sfdp = _render_sfdp_template(SFDP_TEMPLATE_DIR, SFDP_TEMPLATE_FILE, endpoints, specs)
-    
-    logger.debug(f"All good, rendered_sfdp = {rendered_sfdp}, creating output project")
-    os.makedirs(output_path, exist_ok=True)
-    sfdp_path, index = _get_next_filename(output_path)
-    with open(sfdp_path, "w") as file:
-        logger.debug(f"Writing SFDP to file: \n{sfdp_path}")
-        file.write(rendered_sfdp)
-
-    sfdp_transform_path = f"{output_path}{os.sep}transforms{os.sep}"
-    if index == 0 :
-        logger.debug(f"Copying template elements to the SFDP project")
-        shutil.copy(f"{SFDP_TEMPLATE_DIR}{os.sep}README.md", output_path)
-        shutil.copy(f"{SFDP_TEMPLATE_DIR}{os.sep}.env", output_path)
-
-        shutil.copy(f"{SFDP_TEMPLATE_DIR}{os.sep}requirements.txt", output_path)
-        shutil.copy(f"{SFDP_TEMPLATE_DIR}{os.sep}requirements-dev.txt", output_path)
-
-        shutil.copy(f"{SFDP_TEMPLATE_DIR}{os.sep}Dockerfile_from_src", output_path)
-        shutil.copy(f"{SFDP_TEMPLATE_DIR}{os.sep}Dockerfile_from_img", output_path)
-
-        shutil.copy(f"{SFDP_TEMPLATE_DIR}{os.sep}.gitignore", output_path)
-        shutil.copy(f"{SFDP_TEMPLATE_DIR}{os.sep}.gitattributes", output_path)
-        shutil.copy(f"{SFDP_TEMPLATE_DIR}{os.sep}.gitlab-ci.yml", output_path)
-        
-        # shutil.copy(f'{SFDP_TEMPLATE_DIR}{os.sep}teadal_executor-0.1.1-py3-none-any.whl', output_path)
-        os.makedirs(sfdp_transform_path, exist_ok=True)
-
-    logger.debug(f"Copying .py files from {transforms_path} to  {sfdp_transform_path}")
-    for transforms_path_entry in os.listdir(transforms_path):
-        transform_source_path = os.path.join(transforms_path, transforms_path_entry)
-        if os.path.isfile(transform_source_path):
-            shutil.copy(transform_source_path, sfdp_transform_path)
+    logger.debug(f"ready to go args={pformat(object=args, indent=2)}")
+    main(args)

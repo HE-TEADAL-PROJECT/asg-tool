@@ -6,9 +6,13 @@ ASG-Tool depends on IBM Gin library that implements the agentic system for gener
 This entry specifies the list of LLM Providers that can be used, selected by what's specified later in the file in the `generation` entry.
 Currently, IBM GIN library supports several LLM providers. For TEADAL project, the possibilities are:
 
-1. `ollama` requires `ollama` server to be accessible. The server can be installed either on the developer's workstation where the ASG is run or on a server accessible from the developer's workstation. In any case, the address of the `ollama` server has to be configured. For reference, see examples for the [ollama service running locally](../examples/config/gin-ollama-local.yaml) and for the [ollama service running on TEADAL Node](../examples/config/gin-ollama-tdl-node.yaml). To check accessibility of Ollama service enabled on Teadal Node, you can, for example, invoke:
+1. `ollama` requires `ollama` server to be accessible. The server can be installed either on the developer's workstation where the ASG is run or on a server accessible from the developer's workstation. In any case, the address of the `ollama` server has to be configured. For reference, see examples for the [ollama service running locally](../examples/config/gin-ollama-local.yaml) and for the [ollama service running on TEADAL Node](../examples/config/gin-ollama-tdl-node.yaml). 
+> **Note**
+> Above files are provided as examples. You need to edit the `api_base` entry to suite your installation of Ollama service.
+
+To check accessibility of Ollama service, you can, for example, invoke:
 ```sh
-$ curl <teadal-node-ip>/ollama/api/tags | python -m json.tool
+$ curl <Ollama service IP>/ollama/api/tags | python -m json.tool
 ```
 
 2. `IBM WatsonX` provider is available through the IBM Cloud as a service. To use this provider, one must be registered with the IBM cloud and obtain the API key and the projectID as shown in the [ASG-watsonx configuration example](../examples/config/gin-watsonx.yaml). 
@@ -39,7 +43,7 @@ aiPlatforms:
     platform: openai
     credentials:
       api_key: ollama
-      # change this url to suite your ollama service!
+      # EDIT THIS URL TO SUITE YOUR OLLAMA INSTALLATION!!!
       api_base: http://localhost:11434/v1 
   # watsonx - required the URL (do not change), API key (use yours), and project id (use yours)
   Watsonx:      
@@ -81,4 +85,8 @@ generation:
     llmEval: false
 ```
 
+## Proceed generating the SFDP 
 
+Now when you have installed and configured the ASG-Tool, you can proceed with the following steps:
+- Prepare ASG-Tool inputs to suite the requirements of your FDP-to-SFDP contract following the [sFDP specification instructions](./03-specifying-sfdp.md). 
+- Then follow the [ASG-Tool usage instructions](./04-generating-sfdp.md) to generate the SFDP.

@@ -26,6 +26,12 @@ python src/generate_sfdp.py                     \
     -o <path to the output directory>           \ # optional, default is ./generated_servers/
 ```
 
+- To enable debug output, please setup the following environment variables, either in command line or by `export`:
+```sh
+DEBUG=true      # to enable asg-tool debug messages
+GIN_DEBUG=true  # to enable GIN debug messages 
+```
+
 As a result, the directory specified as `-o` parameter will be created and will contain the new SFDP project files that can be examined and validated as decribed [here](./05-validating-sfdp.md).
 
 ## Troubleshooting

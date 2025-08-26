@@ -1,0 +1,6 @@
+# requirements-local.txt
+-r requirements-base.txt
+# change the link to use http/ssh to suite your setup
+git+https://gitlab.teadal.ubiwhere.com/teadal-tech/asg-runtime.git
+# git+ssh://git@gitlab.teadal.ubiwhere.com/teadal-tech/asg-runtime.git
+#git+ssh://git@gl-tdl/teadal-tech/asg-runtime.git

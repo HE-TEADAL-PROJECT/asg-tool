@@ -1,3 +1,4 @@
+from typing import Any
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request, Response
@@ -38,7 +39,11 @@ async def get_stats(request: Request) -> dict:
     executor: Executor = request.app.state.executor
     return executor.get_stats()
 
-
+@app.get("/service/transforms", tags=["service"])
+async def get_transforms(request: Request) -> list:
+   executor: Executor = request.app.state.executor
+   return executor.get_transforms()
+   
 @app.post("/service/origin_cache/clean", tags=["service"])
 async def clear_origin_cache(request: Request) -> str:
     executor: Executor = request.app.state.executor
@@ -79,33 +84,34 @@ async def get_endpoint_data(request: Request, endpoint_spec: str) -> Response:
         raise HTTPException(status_code=500, detail=message)
  
 # --- Generated Data Endpoints ---
+
 {% for endpoint in endpoints %}
 @app.{{ endpoint.method }}("{{ endpoint.sfdp_endpoint_path }}", tags=["data"])
 async def {{ endpoint.sfdp_endpoint_name }}(request: Request, {% for param in endpoint.parameters %}{{ param.name }}: {% if param.type == 'string' %}str{% elif param.type == 'integer' %}int{% elif param.type == 'boolean' %}bool{% elif param.type == 'number' %}float{% else %}Any{% endif %}{% if param.nullable %} = None{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}):
     """
     {{ endpoint.description }}
     """
-    path_params = {
+    path_params: dict = {
         {%- for param in endpoint.parameters if param.in == 'path' %}
         "{{ param.name }}": {{ param.name }}{%- if not loop.last %},{%- endif %}
         {%- endfor %}
     }
-    query_params = {
+    query_params: dict = {
         {%- for param in endpoint.parameters if param.in == 'query' %}
         "{{ param.name }}": {{ param.name }}{%- if not loop.last %},{%- endif %}
         {%- endfor %}
     }
     # Create Yaml and run executor
-    full_spec = {{endpoints_full_connectors_specs[endpoint.sfdp_endpoint_name]}}
+    endpoint_spec: dict[str, Any] = {{endpoint_specs[endpoint.sfdp_endpoint_name]}}
     for i, param in enumerate(path_params):
-        if full_spec["spec"]["apiCalls"]["{{endpoint.name}}"]["arguments"][i]["argLocation"] == 'parameter':
-            full_spec["spec"]["apiCalls"]["{{endpoint.name}}"]["arguments"][i]["value"] = path_params[param]
+        if endpoint_spec["spec"]["apiCalls"]["{{endpoint.name}}"]["arguments"][i]["argLocation"] == 'parameter':
+            endpoint_spec["spec"]["apiCalls"]["{{endpoint.name}}"]["arguments"][i]["value"] = path_params[param]
 
     for i, param in enumerate(query_params):
-        if full_spec["spec"]["apiCalls"]["{{endpoint.name}}"]["arguments"][i]["argLocation"] == 'header':
-            full_spec["spec"]["apiCalls"]["{{endpoint.name}}"]["arguments"][i]["value"] = query_params[param] 
+        if endpoint_spec["spec"]["apiCalls"]["{{endpoint.name}}"]["arguments"][i]["argLocation"] == 'header':
+            endpoint_spec["spec"]["apiCalls"]["{{endpoint.name}}"]["arguments"][i]["value"] = query_params[param] 
 
-    spec_string = f"""{full_spec}"""
+    spec_string = f"""{endpoint_spec}"""
 
     return await get_endpoint_data(request, spec_string)
 {% endfor %}

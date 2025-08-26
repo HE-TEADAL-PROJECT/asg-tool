@@ -1,2 +1,7 @@
--r requirements.txt
+-r requirements-local.txt
 fastapi[standard]
+mypy
+black
+ruff
+
+
