@@ -1,0 +1,26 @@
+sfdp_endpoints:  
+    - persons:
+        fdp_path: /persons
+        sfdp_path: /persons
+        sfdp_endpoint_descr: This endpoint returns persons
+        schema:
+            Person:
+                type: object
+                properties:
+                    person_id:
+                    birth_datetime:
+    - persons_by_id:
+        fdp_path: /persons/{person_id}
+        sfdp_path: /persons_by_id/{person_id}
+        sfdp_ep_descr: This endpoint returns persons by their ids
+        sfdp_ep_params:
+        - name: person_id
+          py_type : int
+          example: 33
+          nullable: false
+        schema:
+            Person:
+                type: object
+                properties:
+                    person_id:
+                    birth_datetime:

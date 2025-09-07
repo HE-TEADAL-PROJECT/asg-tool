@@ -1,0 +1,25 @@
+sfdp_endpoints:  
+    - persons:
+        fdp_path: /persons
+        sfdp_path: /persons
+        sfdp_endpoint_description: Returns persons with their ids and birth times
+        schema:
+            Person:
+                type: object
+                properties:
+                    person_id:
+                    birth_datetime:
+    - persons_with_age:
+        fdp_path: /persons
+        sfdp_path: /persons_with_age
+        sfdp_endpoint_description: Returns persons with their with their ids and birth times, and their computed ages
+        schema:
+            Person:
+                type: object
+                properties:
+                    person_id:
+                    birth_datetime:
+                    age:
+                        type: integer
+                        example: 3
+                        description: "persons age calculated from birth_datetime"

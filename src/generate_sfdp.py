@@ -3,10 +3,14 @@ from dotenv import load_dotenv
 import argparse
 import sys
 from pprint import pformat
-from jinja2 import Environment, FileSystemLoader
-import files_helper
-import gin_helper
-from utils import setup_logging, logger
+from jinja2 import (
+    Environment,
+    FileSystemLoader,
+)
+from asg_tool import ASGTool
+from utils import files_helper
+from utils.log_helper import setup_logging, logger
+from typing import Any
 
 ASG_TOOL_IMPORT = "from gin.common.tool_decorator import make_tool"
 ASG_RUNTIME_IMPORT = "from asg_runtime import make_tool"
@@ -28,6 +32,54 @@ SFDP_TEMPLATE_FILES = [
     "requirements-dev.txt",
     "requirements-local.txt",
 ]
+
+
+def render_spec(spec: Any, indent: int = 0, step: int = 2) -> str:
+    """
+    Render a Python object (dict, list, primitive) into a string
+    with indentation and support for unquoted sfdp_ep_param refs.
+    """
+    pad = " " * indent
+    if isinstance(spec, str) and spec.startswith("sfdp_ep_param:"):
+        # unwrap reference into bare name
+        return spec.split(":", 1)[1]
+    elif isinstance(spec, dict):
+        if not spec:
+            return "{}"
+        inner = []
+        for k, v in spec.items():
+            rendered_v = render_spec(v, indent + step, step)
+            inner.append(f"{' ' * (indent + step)}{repr(k)}: {rendered_v}")
+        return "{\n" + ",\n".join(inner) + f"\n{pad}" + "}"
+    elif isinstance(spec, list):
+        if not spec:
+            return "[]"
+        inner = []
+        for v in spec:
+            rendered_v = render_spec(v, indent + step, step)
+            inner.append(f"{' ' * (indent + step)}{rendered_v}")
+        return "[\n" + ",\n".join(inner) + f"\n{pad}" + "]"
+    else:
+        return repr(spec)
+
+
+def _render_sfdp_template(
+    template_folder_path: str,
+    template_file_name: str,
+    generated_eps: list[dict],
+) -> str:
+
+    env = Environment(
+        loader=FileSystemLoader(template_folder_path),
+        extensions=["jinja2.ext.loopcontrols"],
+    )
+    env.filters["render_spec"] = render_spec
+    template = env.get_template(template_file_name)
+    data = {
+        "endpoints": generated_eps,
+    }
+    rendered_content = template.render(data)
+    return rendered_content
 
 
 def _write_output(contents) -> str:
@@ -137,54 +189,45 @@ def _get_args_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def _render_sfdp_template(
-    template_folder_path: str,
-    template_file_name: str,
-    endpoints: list[dict],
-    endpoint_specs: dict,
-) -> str:
-
-    env = Environment(
-        loader=FileSystemLoader(template_folder_path),
-        extensions=["jinja2.ext.loopcontrols"],
-    )
-    template = env.get_template(template_file_name)
-    data = {
-        "endpoints": endpoints,
-        "endpoint_specs": endpoint_specs,
-    }
-
-    rendered_content = template.render(data)
-
-    return rendered_content
-
-
 def main(args):
     logger.info("Starting SFDP generation")
 
     try:
-        endpoints, endpoint_specs = gin_helper.generate_sfdp(
+        asg_tool = ASGTool(
             fdp_spec_path=args.fdp_spec,
             fdp_url=args.fdp_url,
             fdp_timeout=args.fdp_timeout,
             fdp_key=args.api_key,
-            instructions_path=args.instructions,
+            asg_spec_path=args.instructions,
             gin_config_path=args.config,
             transforms_path=args.transforms,
         )
     except Exception as e:
-        logger.error(f"SFDP generation failed: {e}", exc_info=True)
+        message = f"Failed to initiate SFDP generation due to: {e}"
+        logger.info(message)
+        logger.debug(message, exc_info=True)
         sys.exit(1)
 
-    logger.info("SFDP generation suceeded, rendering the template")
+    endpoints_to_generate = asg_tool.endpoints_to_generate()
+    logger.info(f"Will generate {endpoints_to_generate} endpoints")
+
+    endpoint_dicts = asg_tool.generate_sfdp()
+    if not endpoint_dicts or len(endpoint_dicts) != endpoints_to_generate:
+        logger.warning(
+            "failed to generate all the endpoints, please collect debug logs and open an issue"
+        )
+
+    logger.info(f"Generated {len(endpoint_dicts)} endpoints")
     rendered = _render_sfdp_template(
-        SFDP_TEMPLATE_DIR, SFDP_TEMPLATE_JINJA, endpoints, endpoint_specs
+        SFDP_TEMPLATE_DIR,
+        SFDP_TEMPLATE_JINJA,
+        endpoint_dicts,
     )
 
     logger.info("SFDP template rendered, writing output")
     app_file = _write_output(rendered)
 
-    logger.info(f"SFDP app generation complete, the code is in {app_file}")
+    logger.info(f"SFDP app generation complete, the app code is in {app_file}")
 
 
 if __name__ == "__main__":

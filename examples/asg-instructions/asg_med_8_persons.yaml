@@ -1,0 +1,101 @@
+sfdp_endpoints:   
+    - persons:
+        fdp_path: /persons
+        sfdp_path: /persons
+        sfdp_endpoint_description: This endpoint returns all person records, with their ids and birthtimes
+        schema:
+            Person:
+                type: object
+                properties:
+                    person_id:
+                    birth_datetime:
+    - persons_with_age:
+        fdp_path: /persons
+        sfdp_path: /persons_with_age
+        sfdp_endpoint_description: This endpoint returns all person records, with their ids, birthtimes, and computed ages
+        schema:
+            Person:
+                type: object
+                properties:
+                    person_id:
+                    birth_datetime:
+                    age:
+                        type: integer
+                        example: 3
+                        description: "persons age calculated from birth_datetime"
+    - persons_over_age:
+        fdp_path: /persons
+        sfdp_path: /persons_over_age/{min_age}
+        sfdp_endpoint_description: This endpoint returns person records for people older than min_age, with their ids, birthtimes, and computed ages        
+        sfdp_ep_params:
+        - name: min_age
+          py_type : int
+          example: 33
+          nullable: false
+        schema:
+            Person:
+                type: object
+                properties:
+                    person_id:
+                    birth_datetime:
+                    person_age:
+                        type: integer
+                        example: 3
+                        description: "the age is above sfdp_ep_param:min_age"
+    - persons_under_age:
+        fdp_path: /persons
+        sfdp_path: /persons_under_age/{max_age}
+        sfdp_endpoint_description: This endpoint returns person records for people younger than max_age, with their ids, birthtimes, and computed ages                
+        sfdp_ep_params:
+        - name: max_age
+          py_type : int
+          example: 3
+          nullable: false
+        schema:
+            Person:
+                type: object
+                properties:
+                    person_id:
+                    birth_datetime:
+                    person_age:
+                        type: integer
+                        example: 3
+                        description: "the age is below sfdp_ep_param:max_age"
+    - persons_between_ages:
+        fdp_path: /persons
+        sfdp_path: /persons_between_ages
+        sfdp_endpoint_description: This endpoint returns person records for people older than min_age and younger than max_age, with their ids, birthtimes, and computed ages                      
+        sfdp_ep_params:
+        - name: min_age
+          py_type : int
+          example: 33
+          nullable: false
+        - name: max_age
+          py_type : int
+          example: 35
+          nullable: false
+        schema:
+            Person:
+                type: object
+                properties:
+                    person_id:
+                    birth_datetime:
+                    person_age:
+                        type: integer
+                        example: 3
+                        description: "the age is above sfdp_ep_param:min_age and below sfdp_ep_param:max_age"
+    - person_by_id:
+        fdp_path: /persons/{person_id}
+        sfdp_path: /person_by_id/{person_id}
+        sfdp_endpoint_description: This endpoint returns one person record specified by person_id
+        sfdp_ep_params:
+        - name: person_id
+          py_type : int
+          nullable: false
+          example: 33
+        schema:
+            Person:
+                type: object
+                properties:
+                    person_id:
+                    birth_datetime:

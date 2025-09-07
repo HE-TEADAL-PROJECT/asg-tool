@@ -1,4 +1,5 @@
 from typing import Any
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, Request, Response
@@ -26,6 +27,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+logger = logging.getLogger(__name__)
 
 # --- Service Endpoints ---
 
@@ -85,33 +87,52 @@ async def get_endpoint_data(request: Request, endpoint_spec: str) -> Response:
  
 # --- Generated Data Endpoints ---
 
-{% for endpoint in endpoints %}
-@app.{{ endpoint.method }}("{{ endpoint.sfdp_endpoint_path }}", tags=["data"])
-async def {{ endpoint.sfdp_endpoint_name }}(request: Request, {% for param in endpoint.parameters %}{{ param.name }}: {% if param.type == 'string' %}str{% elif param.type == 'integer' %}int{% elif param.type == 'boolean' %}bool{% elif param.type == 'number' %}float{% else %}Any{% endif %}{% if param.nullable %} = None{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}):
-    """
-    {{ endpoint.description }}
-    """
-    path_params: dict = {
-        {%- for param in endpoint.parameters if param.in == 'path' %}
-        "{{ param.name }}": {{ param.name }}{%- if not loop.last %},{%- endif %}
-        {%- endfor %}
-    }
-    query_params: dict = {
-        {%- for param in endpoint.parameters if param.in == 'query' %}
-        "{{ param.name }}": {{ param.name }}{%- if not loop.last %},{%- endif %}
-        {%- endfor %}
-    }
-    # Create Yaml and run executor
-    endpoint_spec: dict[str, Any] = {{endpoint_specs[endpoint.sfdp_endpoint_name]}}
-    for i, param in enumerate(path_params):
-        if endpoint_spec["spec"]["apiCalls"]["{{endpoint.name}}"]["arguments"][i]["argLocation"] == 'parameter':
-            endpoint_spec["spec"]["apiCalls"]["{{endpoint.name}}"]["arguments"][i]["value"] = path_params[param]
+{% for ep in endpoints %}
+@app.{{ ep.http_method }}("{{ ep.sfdp_ep_path }}", tags=["data"])
+async def {{ ep.sfdp_ep_name }}(request: Request, {% for param in ep.sfdp_ep_params %}{{ param.name }}: {{ param.py_type }}{% if param.nullable %} = None{% endif %}{% if not loop.last %}, {% endif %}{% endfor %}):
 
-    for i, param in enumerate(query_params):
-        if endpoint_spec["spec"]["apiCalls"]["{{endpoint.name}}"]["arguments"][i]["argLocation"] == 'header':
-            endpoint_spec["spec"]["apiCalls"]["{{endpoint.name}}"]["arguments"][i]["value"] = query_params[param] 
+    """
+    SFDP endpoint description: {{ ep.sfdp_ep_descr }}
+
+    source
+    FDP endpoint description: {{ ep.fdp_ep_descr }}
+    FDP endpoint summary: {{ ep.fdp_ep_sum }}
+    """
+
+    endpoint_spec: dict[str, Any] = {{ ep.spec | render_spec }}
+
+    {% if ep.fdp_ep_p_params or ep.fdp_ep_q_params %}
+    fdp_path_params: dict = {
+    {%- for name, symbol in ep.fdp_ep_p_params.items() %}
+        "{{ name }}": {{ symbol }}{{ "," if not loop.last }}
+    {%- endfor %}
+    }
+    fdp_query_params: dict = {
+    {%- for name, symbol in ep.fdp_ep_q_params.items() %}
+        "{{ name }}": {{ symbol }}{{ "," if not loop.last }}
+    {%- endfor %}
+    }
+    fdp_args = endpoint_spec["spec"]["apiCalls"]["{{ep.fdp_ep_name}}"]["arguments"]
+    for fdp_arg in fdp_args:
+        arg_name=fdp_arg["name"] 
+        logger.debug(f"fdp_arg={fdp_arg}")
+        if fdp_arg["argLocation"] == 'parameter':
+            value = fdp_path_params.get(arg_name)
+            logger.debug(f"path parameter with value {value}")
+        elif fdp_arg["argLocation"] == 'header':
+            value = fdp_query_params.get(arg_name)
+            logger.debug(f"query parameter with value {value}")
+        else:
+            logger.warning(f"unsupported fdp argument argLocation: {fdp_arg["argLocation"]}")
+            continue
+        if not value:
+            logger.warning(f"failed to match fdp argument: {arg_name}")
+            continue
+        logger.debug(f"substituting fdp parameter {arg_name} with value={value}")
+        fdp_arg["value"] = value 
+    {% endif %}
 
     spec_string = f"""{endpoint_spec}"""
-
     return await get_endpoint_data(request, spec_string)
+
 {% endfor %}

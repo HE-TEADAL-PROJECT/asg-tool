@@ -1,0 +1,15 @@
+sfdp_endpoints:   
+    - persons_by_id:
+        fdp_path: /persons/{person_id}
+        sfdp_path: /persons/{person_id}
+        sfdp_endpoint_description: This endpoint returns the person record for person with a given id
+        schema:
+            Person:
+                type: object
+                properties:
+                    person_id:
+                    birth_datetime:
+                    person_age:
+                        type: integer
+                        example: 3
+                        description: "compute person age"

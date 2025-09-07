@@ -1,40 +1,99 @@
 from gin.common.tool_decorator import make_tool
 # from asg_runtime import make_tool
 
+from typing import Any
+import pandas as pd
 
 @make_tool
-def map_field(df, source, target):
+def map_field(df: pd.DataFrame, source: str, target: str) -> pd.DataFrame:
     """
-    map fields or change names from source to target.
+    Creates or updates a column in the DataFrame by copying values from another column.
 
     Args:
-        df (any): input dataframe.
-        source (str) : The first column name.
-        target (str) : The second column name.
+        df (pd.DataFrame): Input DataFrame.
+        source (str): Name of the source column whose values will be copied.
+        target (str): Name of the target column to create or overwrite.
+
     Returns:
-        df after mapping the source to target
+        pd.DataFrame: DataFrame with the target column set to the values of the source column.
+
+    Raises:
+        KeyError: If the source column does not exist in df.
     """
+    if source not in df.columns:
+        raise KeyError(f"Column '{source}' not found in DataFrame.")
+
     df[target] = df[source]
     return df
 
-
-@make_tool
-def concatenate_fields(df, col1, col2, output):
+def rename_column(df: pd.DataFrame, old_name: str, new_name: str) -> pd.DataFrame:
     """
-    concatenate Two fields.
+    Renames a column in the DataFrame.
 
     Args:
-        df (any): input dataframe.
-        col1 (str) : The first column.
-        col2 (str) : The second column.
-        output (str) : the new column name, the target.
+        df (pd.DataFrame): Input DataFrame.
+        old_name (str): Current name of the column to rename.
+        new_name (str): New name for the column.
+
     Returns:
-        df with new output column of the concatenation of col1 and col2
+        pd.DataFrame: DataFrame with the column renamed.
+
+    Raises:
+        KeyError: If old_name does not exist in df.
     """
-    # Convert the columns to strings and concatenate their values
-    df[output] = df[col1].astype(str) + df[col2].astype(str)
+    if old_name not in df.columns:
+        raise KeyError(f"Column '{old_name}' not found in DataFrame.")
+
+    return df.rename(columns={old_name: new_name})
+
+@make_tool
+def concatenate_fields(df: pd.DataFrame, col1: str, col2: str, output: str, sep: str = "") -> pd.DataFrame:
+    """
+    Concatenates the string representations of two columns into a new column.
+
+    Args:
+        df (pd.DataFrame): Input DataFrame.
+        col1 (str): The first column name.
+        col2 (str): The second column name.
+        output (str): The name of the new column to create or overwrite.
+        sep (str, optional): Separator to insert between values. Defaults to "".
+
+    Returns:
+        pd.DataFrame: DataFrame with the new output column containing concatenated values.
+
+    Raises:
+        KeyError: If either col1 or col2 does not exist in df.
+    """
+    if col1 not in df.columns:
+        raise KeyError(f"Column '{col1}' not found in DataFrame.")
+    if col2 not in df.columns:
+        raise KeyError(f"Column '{col2}' not found in DataFrame.")
+
+    df[output] = df[col1].astype(str) + sep + df[col2].astype(str)
     return df
 
+@make_tool
+def filter_by_column_value(df: pd.DataFrame, filter_column: str, filter_value: Any) -> pd.DataFrame:
+    """
+    Filters the input DataFrame to return only rows with values equal to the input filter_value in the column named filter_column.
+
+    Args:
+        df (pd.DataFrame)   : Input DataFrame.
+        filter_column (str) : The name of the column to filter on.
+        filter_value (Any)  : The filter value to match.
+    
+    Returns:
+        pd.DataFrame: A filtered DataFrame containing only rows where the given column equals filter_value.
+    
+    Raises:
+        KeyError: If filter_column does not exist in df.
+    """
+    if filter_column not in df.columns:
+        raise KeyError(f"Column '{filter_column}' not found in DataFrame.")
+
+    return df[df[filter_column] == filter_value]
+
+# older transforms stay here for just in case
 
 @make_tool
 def filter_by_year(df, year_col, input_year):

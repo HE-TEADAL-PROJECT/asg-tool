@@ -41,7 +41,11 @@ sfdp_endpoints:
         fdp_path: < path to the endpoint in the source FDP >
         sfpd_path: < path to the endpoint in the generated SFDP >
         sfdp_endpoint_description: < String describing the generated SFDP endpoint >
-
+        sfdp_ep_params:
+        - name: <string>
+          py_type : <int| str | bool>
+          example: <possible value, must be of the correct type>
+          nullable: <false if required; true otherwise>
         schema:
             # what will be returned by the generated endpoint
             <schema-name>:
@@ -52,7 +56,8 @@ sfdp_endpoints:
                         type: < string | integer | number | ? >
                         example: < example value >
                         description: < string describing the property >
-
+                    <property2-name>: # this property (with no description) will be taken from the origin data as is
+                    ...
                     # more properties can follow
 
     # more enpoints can follow
@@ -63,6 +68,7 @@ Each entry under **`sfdp_endpoints`** represents one endpoint to be included in 
 - **`fdp_path`**: This key is required and must contain a string representing the path to the corresponding endpoint existing in the source FDP. The string can contain placeholders for dynamic segments (e.g., `/stops/stop_id/{stop_id}`).
 - **`sfdp_path`**: This key is required and must contain a string representing the path to the generated SFDP endpoint. It can mirror the placeholders in the source FDP path with similar placeholders (e.g., `/stop_id/{stop_id}`).
 - **`sfdp_endpoint_description`**: This element is optional and can contain a string with the description of the generated SFDP endpoint. This is not required by the ASG tool and is used only as part of the OpenAPI specification of the generated SFDP, to help SFDP users by explaining the endpoints available from the generated SFDP. 
+- **`sfdp_ep_params`**: This element is optional and should be present if the endpoint depends on parameters. Each parameter must have a name, a valid python type, and a valid example value.
 - **`schema`**: This element is required and must contain a dictionary defining the schema for the data to be returned by the endpoint. This disctionary describes the data properties along with their types and structures, along with the well-formed descriptions that will help ASG tool to derive the required data items from data exposed by the corresponding endpoint of the source FDP. 
 
 ### Specifying Data Schemas for the SFDP endpoints
@@ -70,7 +76,7 @@ Each entry under **`sfdp_endpoints`** represents one endpoint to be included in 
 
 The **`schema`** structure is a dictionary named as the data structure it describes, with the following keys:
 - **`type`**: (String) The type of the data described by the schema. It is usually `object` to indicate a structured dat object.
-- **`properties`**: A dictionary that defines the properties of the data described by the schema with `type: object`. Each property must contain name, type, and description, formatted as specified next.
+- **`properties`**: A dictionary that defines the properties of the data described by the schema with `type: object`. If the property needs to be computed from properties existing in the source data frame, include `name`, `type`, and `description`, formatted as specified next. If the property should be taken from the source dataframe as is, include only `name`.
 
 ### Specifying individual data elements as part of SFDP Data Schemas
 >? maybe we can include both the regular description, to become part of the OpenAPI spec of the generated SFDP, and another, more structured description that helps constructing the required property from the source data.
@@ -78,7 +84,7 @@ The **`schema`** structure is a dictionary named as the data structure it descri
 Each data element returned by the generated SFDP enpoint is specified as an entry in the **`properties`** dictionary. The entries are named as the data elements they specify and contain the following keys:
 - **`type`**: This key is required and must contain a string defining the data type for the property (e.g., `integer`, `string`). 
 - **`example`**: This key is optional and can contain an example value for the property. This is not required by the ASG tool and is used only as part of the OpenAPI specification of the generated SFDP, to help SFDP users by illustrating a sample data value that conforms to the property's type.
-- **`description`**: This key is required and must contain a string describing this property. This is used by the ASG tool to derive the way this property can be constructed from the data exposed by the source FDP endpoint. 
+- **`description`**: This key is required and must contain a string describing this property. This is used by the ASG tool to derive the way this property can be constructed from the data exposed by the source FDP endpoint. If the property depeneds on one or more parameters listed for this endpoint (as **`sfdp_ep_params`**), it should be mentioned as follows: `sfdp_ep_param:<param_name>`
 
 ## Examples
 

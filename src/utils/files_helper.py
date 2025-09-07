@@ -1,11 +1,32 @@
 import os
 import importlib.util
 import shutil
+import yaml
 import hashlib
 import filecmp
 from pathlib import Path
 from typing import Callable
-from utils import logger
+from .log_helper import logger
+
+
+def iter_files_from_dir(from_dir: str, ext: str):
+    """
+    Recursively walk from_dir, yield files with 'ext'.
+    """
+    from_path = Path(from_dir).resolve()
+
+    if not from_path.exists():
+        raise FileNotFoundError(f"Source directory {from_path} does not exist")
+
+    for root, _, files in os.walk(from_path):
+        root_path = Path(root)
+        files = [f for f in files if f.endswith(ext)]
+        if not files:
+            continue
+
+        for f in files:
+            file = root_path / f
+            yield file
 
 
 def iter_files(from_dir: str, to_dir: str, ext: str):
@@ -179,7 +200,7 @@ def copy_files(from_dir: str, to_dir: str, ext: str = ".py") -> None:
                 logger.debug(f"copied: {src_file} -> {dest_file}")
 
 
-def load_user_functions(folder_path: str) -> dict[str, Callable]:
+def load_functions(folder_path: str) -> dict[str, Callable]:
     """
     Recursively load all top-level functions from Python scripts in a folder.
 
@@ -233,18 +254,6 @@ def get_next_filename(folder: str, base_name: str, ext: str = ".py") -> tuple[st
         index += 1
 
 
-if __name__ == "__main__":
-    import utils
-
-    utils.setup_logging()
-
-    # functions = load_user_functions(folder_path="./transforms")
-    # logger.debug("functions={functions}")
-
-    copy_replacing_line(
-        from_dir="./transforms",
-        to_dir="./new_transforms",
-        ext=".py",
-        line_to_replace="from gin.common.tool_decorator import make_tool",
-        replacement_line="from asg_runtime import make_tool",
-    )
+def dict_from_file(file_path: str) -> dict:
+    with open(file_path, "r") as file:
+        return dict(yaml.safe_load(file))

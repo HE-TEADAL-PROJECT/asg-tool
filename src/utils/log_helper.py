@@ -23,8 +23,6 @@ def setup_logging():
     _setup_logging()
     gin_log_level = "DEBUG" if os.getenv("GIN_DEBUG") else "INFO"
     logger.debug(f"gin_log_level={gin_log_level}")
-    logger.debug(f"gin_loggers={gin_loggers}")
-    logger.debug(f"noisy_lib_loggers={noisy_lib_loggers}")
 
     # now, let GIN do its thing (this disables my settings)
     GinLogging(log_level=gin_log_level)
@@ -32,27 +30,27 @@ def setup_logging():
     # now, take back the control
     _setup_logging()
 
-    # if GIN_DEBUG not set, silence its loggers
-    if not os.getenv("GIN_DEBUG"):
-        for name in gin_loggers:
-            _silence_logger(name, logging.WARNING)
+    if os.getenv("GIN_DEBUG"):
+        logger.debug(f"enabling DEBUG for gin_loggers: {gin_loggers}")
+        for gin_logger_name in gin_loggers:
+            _set_logger_level(gin_logger_name, logging.DEBUG)
 
-    # silence other unwanted loggers
-    for name in noisy_lib_loggers:
-        _silence_logger(name, logging.WARNING)
+    logger.debug(f"disabling DEBUG for: {noisy_lib_loggers}")
+    for noisy_lib_logger in noisy_lib_loggers:
+        _set_logger_level(noisy_lib_logger, logging.WARNING)
 
 
-def _silence_logger(noisy_logger_name: str, level):
-    noisy_logger = logging.getLogger(noisy_logger_name)
-    noisy_logger.setLevel(level)  # cap them unless GIN_DEBUG is set
-    noisy_logger.propagate = True  # let it bubble to your root handlers
+def _set_logger_level(logger_name: str, level):
+    logger = logging.getLogger(logger_name)
+    logger.setLevel(level)  # cap them unless GIN_DEBUG is set
+    logger.propagate = True  # let it bubble to your root handlers
 
 
 def _setup_logging():
     format = (
         "%(asctime)s [%(levelname)s] %(module)s.%(funcName)s.%(lineno)d: %(message)s"
     )
-    formatter = Formatter(format, datefmt="%H:%M")
+    formatter = Formatter(fmt_dev=format, datefmt="%H:%M")
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(formatter)
     logging.basicConfig(
@@ -72,19 +70,34 @@ COLORS = {
     logging.ERROR: "\033[31m",  # red
     logging.CRITICAL: "\033[41m\033[30m",  # red bg, black text
 }
+FORMAT_DEV = (
+    "%(asctime)s [%(levelname)s] %(module)s.%(funcName)s.%(lineno)d: %(message)s"
+)
+FORMAT_USR = "%(asctime)s [%(levelname)s]: %(message)s"
+FORMAT_DATE = "%H:%M"
 
 
 class Formatter(logging.Formatter):
-    def __init__(self, fmt: str, datefmt: str, use_color: bool = True):
-        super().__init__(fmt=fmt, datefmt=datefmt)
-        self.fmt = fmt
-        self.datefmt = datefmt
+    def __init__(
+        self,
+        datefmt: str = FORMAT_DATE,
+        fmt_usr: str = FORMAT_USR,
+        fmt_dev: str = FORMAT_DEV,
+        use_color: bool = True,
+    ):
+        super().__init__(datefmt=datefmt)
+        self.fmt_usr = fmt_usr
+        self.fmt_dev = fmt_dev
         self.use_color = use_color
 
     def format(self, record):
-        fmt = self.fmt
+        if record.levelno == logging.INFO:
+            fmt = self.fmt_usr
+        else:
+            fmt = self.fmt_dev
+
         if self.use_color and record.levelno in COLORS:
-            fmt = COLORS[record.levelno] + self.fmt + "\033[0m"
+            fmt = COLORS[record.levelno] + fmt + "\033[0m"
         formatter = logging.Formatter(fmt, self.datefmt)
         return formatter.format(record)
 
