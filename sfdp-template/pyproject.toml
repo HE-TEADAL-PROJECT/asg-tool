@@ -20,13 +20,7 @@ local = [
     "asg-runtime @ git+https://gitlab.teadal.ubiwhere.com/teadal-tech/asg-runtime.git",
 ]
 dev = [
-    "pytest",
-    "mypy",
-    "black",
-    "ruff",
-    "coverage",
-    "pre-commit",
-    # "types-PyYAML",
+    "fastapi[standard]",
 ]
 cache-disk = ["diskcache"]
 cache-redis = ["redis"]

@@ -16,7 +16,7 @@ dependencies = [
     "fastapi-cli",
     "uvicorn",
     "Jinja2",
-    "GIN @ file:.reqs/GIN-0.1.1-py3-none-any.whl",
+    "gin @ file:.reqs/GIN-0.1.1-py3-none-any.whl",
 ]
 [project.optional-dependencies]
 dev = [
