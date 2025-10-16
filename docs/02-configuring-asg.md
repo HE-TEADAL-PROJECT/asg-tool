@@ -12,7 +12,11 @@ Currently, IBM GIN library supports several LLM providers. For TEADAL project, t
 
 To check accessibility of Ollama service, you can, for example, invoke:
 ```sh
-$ curl <Ollama service IP>/ollama/api/tags | python -m json.tool
+# Ollama-Host-IP is the address of the server hosting ollama service, e.g., 'localhost'
+$ curl <Ollama-Host-IP>/ollama/api/tags | python -m json.tool
+
+# or, if you have 'jq' available
+$ curl <Ollama-Host-IP>/ollama/api/tags | jq
 ```
 
 2. `IBM WatsonX` provider is available through the IBM Cloud as a service. To use this provider, one must be registered with the IBM cloud and obtain the API key and the projectID as shown in the [ASG-watsonx configuration example](../examples/config/gin-watsonx.yaml). 

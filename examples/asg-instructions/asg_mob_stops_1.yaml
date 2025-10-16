@@ -1,0 +1,17 @@
+  sfdp_endpoints:
+    - stops:
+        fdp_path: /stops
+        sfdp_path: /stops
+        schema:
+            Stop:
+                type: object
+                properties:
+                    stop_id:
+                    stop_name:
+                    stop_lat:
+                    stop_lon:
+                    stop_full_name:
+                        type: string
+                        example: Martiri LibertĂ SaittaMarshall
+                        description: "Concatenate columns stop_name and stop_desc into a new stop_full_name column"
+                    wheelchair_boarding:

@@ -4,6 +4,9 @@ from gin.common.tool_decorator import make_tool
 from typing import Any
 import pandas as pd
 
+import logging
+logger = logging.getLogger(__name__)
+
 @make_tool
 def map_field(df: pd.DataFrame, source: str, target: str) -> pd.DataFrame:
     """
@@ -26,6 +29,7 @@ def map_field(df: pd.DataFrame, source: str, target: str) -> pd.DataFrame:
     df[target] = df[source]
     return df
 
+@make_tool
 def rename_column(df: pd.DataFrame, old_name: str, new_name: str) -> pd.DataFrame:
     """
     Renames a column in the DataFrame.
@@ -47,7 +51,7 @@ def rename_column(df: pd.DataFrame, old_name: str, new_name: str) -> pd.DataFram
     return df.rename(columns={old_name: new_name})
 
 @make_tool
-def concatenate_fields(df: pd.DataFrame, col1: str, col2: str, output: str, sep: str = "") -> pd.DataFrame:
+def concatenate_columns(df: pd.DataFrame, col1: str, col2: str, output: str, sep: str = " ") -> pd.DataFrame:
     """
     Concatenates the string representations of two columns into a new column.
 
@@ -69,6 +73,7 @@ def concatenate_fields(df: pd.DataFrame, col1: str, col2: str, output: str, sep:
     if col2 not in df.columns:
         raise KeyError(f"Column '{col2}' not found in DataFrame.")
 
+    logger.debug(f"concatenate_fields: concatenate {col1} with {col2} separated by {sep}")
     df[output] = df[col1].astype(str) + sep + df[col2].astype(str)
     return df
 
@@ -81,17 +86,20 @@ def filter_by_column_value(df: pd.DataFrame, filter_column: str, filter_value: A
         df (pd.DataFrame)   : Input DataFrame.
         filter_column (str) : The name of the column to filter on.
         filter_value (Any)  : The filter value to match.
-    
+
     Returns:
         pd.DataFrame: A filtered DataFrame containing only rows where the given column equals filter_value.
-    
+
     Raises:
         KeyError: If filter_column does not exist in df.
     """
     if filter_column not in df.columns:
         raise KeyError(f"Column '{filter_column}' not found in DataFrame.")
 
-    return df[df[filter_column] == filter_value]
+    logger.debug(f"filter_by_column_value: filter column {filter_column} by {filter_value}")
+    # Convert both column values and filter_value to string for comparison
+    return df[df[filter_column].astype(str) == str(filter_value)]
+
 
 # older transforms stay here for just in case
 

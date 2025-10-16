@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "A tool to generate SFDP apps"
 authors = [{name = "TEADAL-WP4"}]
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.12,<3.13"
 
 # dependencies
 dependencies = [
@@ -16,6 +16,7 @@ dependencies = [
     "fastapi-cli",
     "uvicorn",
     "Jinja2",
+    "geopy",
     "gin @ file:.reqs/GIN-0.1.1-py3-none-any.whl",
 ]
 [project.optional-dependencies]
@@ -53,6 +54,6 @@ log_cli_date_format = "%Y-%m-%d %H:%M:%S"
 # use this if decide to have explicit packages under src/
 # [tool.setuptools]
 # packages = { find = {} }
-# 
+#
 # [tool.setuptools.packages.find]
 # where = ["src"]

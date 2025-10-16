@@ -14,6 +14,7 @@ requires-python = ">=3.12"
 dependencies = [
     "fastapi",
     "uvicorn",
+    "geopy",
 ]
 [project.optional-dependencies]
 local = [
@@ -51,6 +52,6 @@ log_cli_date_format = "%Y-%m-%d %H:%M:%S"
 # use this if decide to have explicit packages under src/
 # [tool.setuptools]
 # packages = { find = {} }
-# 
+#
 # [tool.setuptools.packages.find]
 # where = ["src"]

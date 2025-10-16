@@ -1,0 +1,68 @@
+  sfdp_endpoints:
+    - stops:
+        fdp_path: /stops
+        sfdp_path: /stops
+        schema:
+            Stop:
+                type: object
+                properties:
+                    stop_id:
+                    stop_name:
+                    stop_lat:
+                    stop_lon:
+                    stop_full_name:
+                        type: string
+                        example: Martiri LibertĂ SaittaMarshall
+                        description: "Concatenate columns stop_name and stop_desc into a new stop_full_name column"
+                    wheelchair_boarding:
+    - stops_by_id:
+        fdp_path: /stops
+        sfdp_path: /stops/{stop_id}
+        sfdp_ep_params:
+        - name: stop_id_param
+          py_type : int
+          example: 2
+          nullable: false
+        schema:
+            Stop:
+                type: object
+                properties:
+                    stop_id:
+                        type: string
+                        example: "101"
+                        description: "Filters stops by stop_id  equal to the sfdp_ep_param:stop_id_param"
+                    stop_name:
+                    stop_lat:
+                    stop_lon:
+                    stop_desc:
+                    wheelchair_boarding:
+    - stops_near_point:
+        fdp_path: /stops
+        sfdp_path: /stops_near_point
+        sfdp_ep_params:
+        - name: lat
+          py_type : float
+          example: 37.555
+          nullable: false
+        - name: lon
+          py_type : float
+          example: 15.555
+          nullable: false
+        - name: distance
+          py_type : int
+          example: 300
+          nullable: false
+        schema:
+            Stop:
+                type: object
+                properties:
+                    distance:
+                        type: int
+                        example: "450"
+                        description: "For each stop, compute distance from a given geographic point specified by sfdp_ep_param:lat and sfdp_ep_param:lon. Include only stops closer to a given geographic point than sfdp_ep_param:distance meters"
+                    stop_id:
+                    stop_name:
+                    stop_lat:
+                    stop_lon:
+                    stop_desc:
+                    wheelchair_boarding:
