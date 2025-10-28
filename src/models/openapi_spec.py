@@ -1,6 +1,7 @@
 from __future__ import annotations  # to allow using the defined models as types
 from pydantic import Field, model_validator
 from typing import Literal
+import re
 from .base import (
     MyBaseModel,
     HTTPResponseCode,
@@ -43,6 +44,21 @@ class OpenApiOperation(MyBaseModel):
     description: str | None = None
     parameters: list[OpenApiParameter] = []
     responses: dict[str, OpenApiResponse] = {}
+
+
+    @model_validator(mode="before")
+    def ensure_operation_id(cls, values: dict) -> dict:
+        if not values.get("operationId"):
+            # logger.warning(f"no operationID: values={values}")
+            # Get method and path from context if available
+            method = values.get("__method__")  # inject during parsing
+            path = values.get("__path__")      # inject during parsing
+            if method and path:
+                normalized = re.sub(r"[{}]", "", path).strip("/")
+                normalized = normalized.replace("/", "_")
+                values["operationId"] = f"{method}_{normalized}"
+
+        return values
 
     @property
     def response_schema(self) -> Schema | None:
@@ -87,9 +103,29 @@ class OpenApiSpec(MyBaseModel):
     @model_validator(mode="before")
     def normalize_openapi(cls, values: dict) -> dict:
         # Normalize response keys to strings
-        for path_item in values.get("paths", {}).values():
+        for path, path_item in values.get("paths", {}).items():
             for method in ["get", "post", "put", "delete", "patch"]:
                 operation = path_item.get(method)
-                if operation and "responses" in operation:
+                if not operation:
+                    continue
+                # Normalize response keys
+                if "responses" in operation:
                     operation["responses"] = {str(k): v for k, v in operation["responses"].items()}
+                # Inject context for operationId generation
+                operation["__method__"] = method
+                operation["__path__"] = path
         return values
+
+@model_validator(mode="before")
+def normalize_openapi(cls, values: dict) -> dict:
+    for path, path_item in values.get("paths", {}).items():
+        for method in ["get", "post", "put", "delete", "patch"]:
+            operation = path_item.get(method)
+            if operation:
+                # Normalize response keys
+                if "responses" in operation:
+                    operation["responses"] = {str(k): v for k, v in operation["responses"].items()}
+                # Inject context for operationId generation
+                operation["__method__"] = method
+                operation["__path__"] = path
+    return values

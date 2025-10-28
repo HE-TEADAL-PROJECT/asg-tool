@@ -44,6 +44,7 @@ class SFDPSourceDetails(MyBaseModel):
             return None
 
         fdp_ep_response = resolved_fdp_ep_response.name
+        # logger.debug(f"creating SFDPSourceDetails: fdp_ep_name={fdp_ep_name}, fdp_path={fdp_path}, fdp_ep_params={fdp_ep_params}, fdp_ep_response={fdp_ep_response}, fdp_get_op={fdp_get_op}")
         return cls(
             fdp_ep_name=fdp_ep_name,
             fdp_ep_path=fdp_path,
