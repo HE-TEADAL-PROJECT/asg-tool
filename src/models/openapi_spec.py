@@ -1,5 +1,6 @@
 from __future__ import annotations  # to allow using the defined models as types
-from pydantic import Field
+from pydantic import Field, model_validator
+from typing import Literal
 from .base import (
     MyBaseModel,
     HTTPResponseCode,
@@ -29,17 +30,17 @@ class OpenApiResponse(MyBaseModel):
 
 # in can be 'path' meaning it is path parameter like '/path/{path_param}'
 class OpenApiParameter(MyBaseModel):
-    in_: str = Field(..., alias="in")
+    in_: Literal["query", "path", "header", "cookie"] = Field(alias="in")
     name: str
-    required: bool
+    required: bool = False  # <-- make optional with default
     schema_: Schema | None = Field(default=None, alias="schema")
     type: str | None = None  # ?
 
 
 class OpenApiOperation(MyBaseModel):
-    summary: str
-    operationId: str
-    description: str
+    summary: str | None = None
+    operationId: str | None = None
+    description: str | None = None
     parameters: list[OpenApiParameter] = []
     responses: dict[str, OpenApiResponse] = {}
 
@@ -82,3 +83,13 @@ class OpenApiSpec(MyBaseModel):
     openapi: str
     paths: dict[str, OpenApiPathItem]
     components: OpenApiComponents | None = None
+
+    @model_validator(mode="before")
+    def normalize_openapi(cls, values: dict) -> dict:
+        # Normalize response keys to strings
+        for path_item in values.get("paths", {}).values():
+            for method in ["get", "post", "put", "delete", "patch"]:
+                operation = path_item.get(method)
+                if operation and "responses" in operation:
+                    operation["responses"] = {str(k): v for k, v in operation["responses"].items()}
+        return values

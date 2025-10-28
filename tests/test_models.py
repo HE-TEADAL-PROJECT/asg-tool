@@ -6,7 +6,7 @@ import os
 logger = logging.getLogger("test_models")
 
 FDP_SPECS_DIR = "examples/openapi-specs"
-ASG_SPECS_DIR = "tests/data/asg-instructions"
+ASG_SPECS_DIR = "examples/asg-instructions"
 
 
 def test_fdp_spec():
@@ -26,7 +26,8 @@ SPEC_PAIRS = [
     # ("fdp-ind-czech-plant.yaml", "asg-ind-shipments.yaml"),
     # ("fdp-mob-amts-gtfs-static.yaml", "asg-mob-stops.yaml"),
     # ("fdp-med-node01.yaml", "asg-med-persons.yaml"),
-    ("fdp-med-node01.yaml", "asg_med_persons.yaml"),
+    # ("fdp-med-node01.yaml", "asg_med_persons.yaml"),
+    ("fdp-viticulture.yaml", "asg_viticulture.yaml")
     # ...
 ]
 @pytest.mark.parametrize("fdp_file, asg_file", SPEC_PAIRS)

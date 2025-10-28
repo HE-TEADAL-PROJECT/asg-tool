@@ -16,6 +16,10 @@ class FDPSpec(OpenApiSpec):
     @classmethod
     def check_openapi_version(cls, v: str) -> str:
         try:
+            # normalize value to be a string
+            if not isinstance(v, str):
+                v = str(v)
+
             parsed = version.parse(v)
         except Exception:
             raise ValueError(f"FDP spec has invalid OpenAPI version string: {v}")
@@ -84,8 +88,9 @@ class FDPSpec(OpenApiSpec):
 
             type_schema = schemas_dicts.get("type")
             if type_schema:
-                # this is actually a type reference
-                return self.resolve_schema(type_schema)
+                if isinstance(type_schema, Schema):
+                    # this is actually a type reference
+                    return self.resolve_schema(type_schema)
 
             # normal properties
             prop_schemas: dict[str, Schema] = {}

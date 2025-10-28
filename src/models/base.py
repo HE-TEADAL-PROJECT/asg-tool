@@ -12,6 +12,9 @@ class SchemaType(str, Enum):
     INTEGER = "integer"
     BOOLEAN = "boolean"
     NULL = "null"
+    FLOAT = "float"      # non-standard
+    BOOL = "bool"        # non-standard
+
 
 
 class HTTPResponseCode(str, Enum):
@@ -72,6 +75,8 @@ class Schema(MyBaseModel):
                 raise ValueError(
                     f"scalar type '{self.type}' cannot define 'properties' or 'items'"
                 )
+        elif self.type in {SchemaType.FLOAT, SchemaType.BOOL}:
+            self.type = SchemaType.NUMBER if self.type == SchemaType.FLOAT else SchemaType.BOOLEAN
         elif self.type is None:
             raise ValueError("Schema must define either '$ref' or 'type'")
 
