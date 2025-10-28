@@ -2,6 +2,7 @@ sfdp_endpoints:
     - aois:
         fdp_path: /measurement/soilmoisture/aois
         sfdp_path: /aois
+        sfdp_endpoint_description: Returns all the aoi identities
         schema:
             Stop:
                 type: object
@@ -10,17 +11,13 @@ sfdp_endpoints:
     - mesurements_by_aoi:
         fdp_path: /measurement/soilmoisture/aois/{aoi_id}
         sfdp_path: /mesurements_by_aoi/{aoi_id}
+        sfdp_endpoint_description: Returns all measurements for the specified aoi_id
         sfdp_ep_params:
-        - name: aoi_id_param
-          py_type : string
+        - name: aoi_id
+          py_type : str
           example: "aoi1"
           nullable: false
-        - name: from_date_param
-          py_type : string
-          example: "2023-10-23"
-          nullable: false
-        - name: to_date_param
-          py_type : string
+          py_type : str
           example: "2023-10-25"
           nullable: false
         schema:
@@ -29,77 +26,8 @@ sfdp_endpoints:
             properties:
               aoi_id:
               created_at:
-                type: string
-                example: "2023-10-24"
-                description: "Filters measurements by created_at betwen the sfdp_ep_param:from_date_param and the sfdp_ep_param:to_date_param"
               lat:
               lon:
               org_id:
               predicted:
-                type: bool
-                description: a flag indicating whether the value is an actual satellite reading or a model prediction
-              value:
-    - predicted_by_aoi:
-        fdp_path: /measurement/soilmoisture/aois/{aoi_id}
-        sfdp_path: /predicted_by_aoi/{aoi_id}
-        sfdp_ep_params:
-        - name: aoi_id_param
-          py_type : string
-          example: "aoi1"
-          nullable: false
-        - name: from_date_param
-          py_type : string
-          example: "2023-10-23"
-          nullable: false
-        - name: to_date_param
-          py_type : string
-          example: "2023-10-25"
-          nullable: false
-        schema:
-          Measurement:
-            type: object
-            properties:
-              aoi_id:
-              created_at:
-                type: string
-                example: "2023-10-24"
-                description: "Filters measurements by created_at betwen the sfdp_ep_param:from_date_param and the sfdp_ep_param:to_date_param"
-              lat:
-              lon:
-              org_id:
-              predicted:
-                type: bool
-                description: "Filters measurements by predicted equal to False"
-              value:
-    - actual_by_aoi:
-        fdp_path: /measurement/soilmoisture/aois/{aoi_id}
-        sfdp_path: /actual_by_aoi/{aoi_id}
-        sfdp_ep_params:
-        - name: aoi_id_param
-          py_type : string
-          example: "aoi1"
-          nullable: false
-        - name: from_date_param
-          py_type : string
-          example: "2023-10-23"
-          nullable: false
-        - name: to_date_param
-          py_type : string
-          example: "2023-10-25"
-          nullable: false
-        schema:
-          Measurement:
-            type: object
-            properties:
-              aoi_id:
-              created_at:
-                type: string
-                example: "2023-10-24"
-                description: "Filters measurements by created_at betwen the sfdp_ep_param:from_date_param and the sfdp_ep_param:to_date_param"
-              lat:
-              lon:
-              org_id:
-              predicted:
-                type: bool
-                description: "Filters measurements by predicted equal to False"
               value:
