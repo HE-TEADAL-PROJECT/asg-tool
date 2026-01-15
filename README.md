@@ -21,7 +21,7 @@ To contribute to the ASG project, follow instructions [here](./docs/00-developin
 ## Examples
 There are several up-to-date examples created for TEADAL pilots by the recent version of the ASG-Tool powered by the ASG-Runtime. These examples were once contain in the `examples` folder of this repo and were moved to their own repos where they can be updated if needed as the pilot case or the ASG system evolve. As opposed to the older examples that are still kept in the `examples` folder for historical resons, these new examples support caching and other shared features provided by the ASG-Runtime. These examples serve both the specified data endpoints and the service endpoints. Here are the pointers to example repos (you need gitlab access to get there):
 1. Medical - [sfdp-med-node01](https://gitlab.teadal.ubiwhere.com/teadal-tech/sfdp-med-node01)
-2. Industry - [sfdp-ind-czech]https://gitlab.teadal.ubiwhere.com/teadal-tech/sfdp-ind-czech)
+2. Industry - [sfdp-ind-czech](https://gitlab.teadal.ubiwhere.com/teadal-tech/sfdp-ind-czech)
 3. Viticulture - [sfdp-viticulture](https://gitlab.teadal.ubiwhere.com/teadal-tech/sfdp-viticulture)
 4. Mobility - [sfdp-mob-stops](https://gitlab.teadal.ubiwhere.com/teadal-tech/sfdp-mob-stops)
 
